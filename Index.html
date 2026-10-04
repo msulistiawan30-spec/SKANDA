@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKANDA - Sistem SKP SMKN Dander</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--ink:#14302f;--pine:#0e5a4f;--pine2:#0b4a41;--mist:#eef3f2;--line:#d6e0de;--amber:#e8a317;--red:#c2410c;--ok:#15803d;--mut:#5b7270;--r:12px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;height:100%}body{background:var(--mist);color:var(--ink);font-size:14px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{border:0;background:var(--pine);color:#fff;padding:9px 16px;border-radius:9px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--pine2)}.btn:disabled{opacity:.55;cursor:wait}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn.sec:hover{background:var(--mist)}
+.btn.warn{background:var(--amber);color:#2a1c00}.btn.del{background:#fff;color:var(--red);border:1px solid #f0c9b8}
+.btn.sm{padding:5px 10px;font-size:12px}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+input:focus,select:focus,textarea:focus,.btn:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+label{display:block;font-weight:600;font-size:12.5px;margin:12px 0 4px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 10px}.mut{color:var(--mut)}
+#boot{position:fixed;inset:0;background:var(--pine);display:grid;place-items:center;z-index:99;transition:opacity .4s}
+.ring{width:54px;height:54px;border-radius:50%;border:5px solid rgba(255,255,255,.2);border-top-color:var(--amber);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
+.hero{background:var(--pine);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:flex-end}
+.hero b{font-size:clamp(44px,7vw,84px);letter-spacing:-2px;line-height:1;font-weight:800}
+.hero p{max-width:380px;opacity:.85}.hero i{display:block;width:70px;height:6px;background:var(--amber);margin:18px 0;border-radius:3px}
+.lform{display:grid;place-items:center;padding:24px}.lform form{width:100%;max-width:340px}
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100%}
+aside{background:var(--ink);color:#d9e6e4;padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;overflow:auto}
+aside .brand{font-weight:800;font-size:20px;color:#fff;padding:6px 10px 14px}aside .brand small{display:block;font-weight:500;font-size:11px;opacity:.6}
+aside a{padding:10px 12px;border-radius:9px;cursor:pointer;display:flex;gap:10px;align-items:center}
+aside a:hover{background:rgba(255,255,255,.08)}aside a.on{background:var(--amber);color:#2a1c00;font-weight:700}
+.who{margin-top:auto;padding:10px;font-size:12px;border-top:1px solid rgba(255,255,255,.12)}
+main{padding:24px;min-width:0}.top{display:none}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.stat b{display:block;font-size:30px;font-weight:800;color:var(--pine)}
+.bar{display:grid;grid-template-columns:150px 1fr 30px;gap:10px;align-items:center;margin:8px 0}
+.bar div div{height:12px;background:var(--pine);border-radius:6px;min-width:3px}.bar div{background:var(--mist);border-radius:6px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin:12px 0}
+.tabs button{white-space:nowrap;border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:20px;cursor:pointer;font-weight:600}
+.tabs button.on{background:var(--pine);color:#fff;border-color:var(--pine)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--mut)}
+.pill{padding:2px 9px;border-radius:12px;font-size:11.5px;font-weight:700;background:#dcefe6;color:var(--ok)}.pill.off{background:#f7ddd2;color:var(--red)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sk{height:16px;border-radius:6px;background:linear-gradient(90deg,#e3ebea,#f3f7f6,#e3ebea);background-size:200% 100%;animation:sh 1.2s infinite;margin:10px 0}
+@keyframes sh{to{background-position:-200% 0}}
+#toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:90}
+.t{background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;box-shadow:0 6px 20px #0003;animation:in .25s}.t.e{background:var(--red)}
+@keyframes in{from{transform:translateY(10px);opacity:0}}
+#modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:80;padding:14px}
+#modal.on{display:grid}#modal>div{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+.thumb{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+#print{display:none}
+@media(max-width:860px){
+ .login{grid-template-columns:1fr}.hero{padding:28px;min-height:200px}
+ .shell{grid-template-columns:1fr}.top{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;padding:10px 14px;position:sticky;top:0;z-index:30}
+ aside{position:fixed;left:0;top:0;z-index:40;width:260px;transform:translateX(-100%);transition:transform .25s}aside.open{transform:none}
+ #ov{position:fixed;inset:0;background:#0006;z-index:35;display:none}#ov.on{display:block}
+ .grid4{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}main{padding:14px}.bar{grid-template-columns:110px 1fr 24px}}
+@media print{
+ @page{size:A4;margin:15mm}body{background:#fff}body>*:not(#print){display:none!important}#print{display:block;font:12pt 'Times New Roman',serif;color:#000}
+ .pg{page-break-after:always}.pg:last-of-type{page-break-after:auto}
+ .kop{text-align:center;border-bottom:3px double #000;padding-bottom:6px;margin-bottom:14px;line-height:1.3}.kop img{height:60px;float:left}
+ #print table{border:1px solid #000}#print th,#print td{border:1px solid #000;padding:5px 7px;color:#000}#print th{background:#eee}
+ #print img.d{max-width:55mm;max-height:40mm}.ttd{margin:28px 0 0 auto;width:75mm;text-align:center;page-break-inside:avoid}.ttd img{height:60px}
+}
+</style>
+</head>
+<body>
+<div id="boot"><div class="ring"></div></div>
+<div id="app"></div><div id="ov" onclick="menu(0)"></div><div id="modal"></div><div id="toast"></div><div id="print"></div>
+<script>
+// ====== KONFIGURASI: tempel URL Web App Apps Script di sini ======
+const API_URL = 'PASTE_URL_WEB_APP_APPS_SCRIPT_DI_SINI';
+// =================================================================
+const NILAI = ['Berorientasi Pelayanan','Akuntabel','Kompeten','Harmonis','Loyal','Adaptif','Kolaboratif'];
+const DESC = {
+ 'Berorientasi Pelayanan':'Memahami dan memenuhi kebutuhan masyarakat, ramah, cekatan, solutif, dan dapat diandalkan, serta melakukan perbaikan tiada henti.',
+ 'Akuntabel':'Melaksanakan tugas dengan jujur, bertanggung jawab, cermat, serta disiplin, dan berintegritas tinggi.',
+ 'Kompeten':'Terus belajar dan mengembangkan kapabilitas, melaksanakan tugas dengan kualitas terbaik, dan membantu orang lain belajar.',
+ 'Harmonis':'Menghargai setiap orang apapun latar belakangnya, suka menolong orang lain, dan membangun lingkungan kerja yang kondusif.',
+ 'Loyal':'Memegang teguh ideologi Pancasila, UUD 1945, setia kepada NKRI, serta menjaga nama baik sesama ASN, pimpinan, instansi, dan negara.',
+ 'Adaptif':'Terus berinovasi dan mengembangkan kreativitas, bertindak proaktif, serta cepat menyesuaikan diri menghadapi perubahan.',
+ 'Kolaboratif':'Memberi kesempatan kepada berbagai pihak untuk berkontribusi, terbuka bekerja sama, dan menggerakkan pemanfaatan sumber daya bersama.'};
+const NAV_EMP = [['dash','Dashboard'],['profil','Profil Saya'],['jurnal','Jurnal Kegiatan'],['laporan','Laporan SKP'],['pass','Ganti Password']];
+const NAV_ADMIN = [['pegawai','Master Pegawai'],['setting','Pengaturan Laporan']];
+const S = {token:localStorage.skToken||'', user:null, view:'dash', tgt:'', tab:0, emps:[], set:{}};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const img = id => 'https://drive.google.com/thumbnail?id=' + id + '&sz=w900';
+const today = () => new Date().toISOString().slice(0,10);
+
+async function call(action, data = {}) {
+  if (API_URL.startsWith('PASTE')) throw new Error('API_URL belum diisi di skanda.html');
+  const r = await fetch(API_URL, {method:'POST', body:JSON.stringify({action, token:S.token, ...data})});
+  const j = await r.json();
+  if (!j.ok) { if (/Sesi berakhir/.test(j.error)) logout(true); throw new Error(j.error); }
+  return j.data;
+}
+function toast(m, err) { const d = document.createElement('div'); d.className = 't' + (err ? ' e' : ''); d.textContent = (err ? '❌ ' : '✅ ') + m; $('#toast').append(d); setTimeout(() => d.remove(), 3800); }
+async function busy(btn, label, fn) {
+  const t = btn.textContent; btn.disabled = true; btn.textContent = label;
+  try { return await fn(); } catch (e) { toast(e.message, 1); } finally { btn.disabled = false; btn.textContent = t; }
+}
+function modal(h) { $('#modal').innerHTML = '<div>' + h + '</div>'; $('#modal').classList.add('on'); }
+function closeM() { $('#modal').classList.remove('on'); }
+function confirmBox(msg) {
+  return new Promise(res => {
+    modal('<h2>⚠️ Konfirmasi</h2><p>' + msg + '</p><div class="row" style="justify-content:flex-end"><button class="btn sec" id="cn">Batal</button><button class="btn warn" id="cy">Lanjutkan</button></div>');
+    $('#cn').onclick = () => { closeM(); res(false); }; $('#cy').onclick = () => { closeM(); res(true); };
+  });
+}
+const skel = () => '<div class="card"><div class="sk" style="width:40%"></div><div class="sk"></div><div class="sk" style="width:80%"></div><div class="sk"></div></div>';
+const isAdmin = () => S.user && S.user.role === 'Admin';
+const tgtNip = () => S.tgt || S.user.nip;
+function menu(o) { document.querySelector('aside')?.classList.toggle('open', !!o); $('#ov').classList.toggle('on', !!o); }
+
+// ====== Login & shell ======
+function loginView() {
+  $('#app').innerHTML = `<div class="login"><div class="hero"><b>SKANDA</b><i></i><p>Sistem SKP SMKN Dander. Catat jurnal harian, susun SKP berbasis BerAKHLAK, cetak laporan formal.</p></div>
+  <div class="lform"><form id="lf"><h1>Masuk</h1><p class="mut">Gunakan NIP dan password dari admin.</p>
+  <label>NIP</label><input id="nip" autocomplete="username" required><label>Password</label><input id="pw" type="password" autocomplete="current-password" required>
+  <button class="btn" style="width:100%;margin-top:18px" id="lb">Masuk</button></form></div></div>`;
+  $('#lf').onsubmit = e => { e.preventDefault(); busy($('#lb'), 'Memeriksa...', async () => {
+    const d = await call('login', {nip:$('#nip').value, password:$('#pw').value});
+    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; S.view = 'dash'; await boot2();
+  }); };
+}
+function logout(silent) { localStorage.removeItem('skToken'); S.token = ''; S.user = null; S.tgt = ''; loginView(); if (!silent) toast('Anda sudah keluar'); }
+async function boot2() {
+  S.set = await call('getSettings');
+  if (isAdmin()) S.emps = await call('listEmp');
+  shell();
+}
+function shell() {
+  const nav = NAV_EMP.concat(isAdmin() ? NAV_ADMIN : []);
+  $('#app').innerHTML = `<div class="top"><button class="btn sec sm" onclick="menu(1)">☰</button><b>SKANDA</b></div><div class="shell"><aside>
+  <div class="brand">SKANDA<small>SKP SMKN Dander</small></div>
+  ${nav.map(n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')">${n[1]}</a>`).join('')}
+  <div class="who"><b>${esc(S.user.nama)}</b><br>${esc(S.user.role)}<br><a onclick="logout()" style="padding:6px 0;color:var(--amber)">Keluar</a></div></aside><main id="main"></main></div>`;
+  go(S.view);
+}
+async function go(v) {
+  S.view = v; menu(0);
+  document.querySelectorAll('aside a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === v));
+  $('#main').innerHTML = skel();
+  try { $('#main').innerHTML = await VIEWS[v](); } catch (e) { $('#main').innerHTML = '<div class="card">Gagal memuat: ' + esc(e.message) + '</div>'; }
+  scrollTo(0, 0);
+}
+function picker() {
+  if (!isAdmin()) return '';
+  return `<div class="row" style="margin:8px 0"><span class="mut">Pegawai:</span><select style="max-width:300px" onchange="S.tgt=this.value;go(S.view)">
+  ${S.emps.map(e => `<option value="${esc(e.nip)}" ${tgtNip() == e.nip ? 'selected' : ''}>${esc(e.nama)} (${esc(e.nip)})</option>`).join('')}</select></div>`;
+}
+
+// ====== Views ======
+const VIEWS = {
+ async dash() {
+  const d = await call('getSkp', {nip:tgtNip()});
+  const cnt = NILAI.map(n => d.kegiatan.filter(k => k.nilai === n).length), max = Math.max(1, ...cnt);
+  const withDok = d.kegiatan.filter(k => d.dok.some(x => x.kegiatanId === k.id)).length, tot = d.kegiatan.length;
+  return `<h1>Dashboard</h1>${picker()}<div class="grid4">
+   <div class="card stat"><b>${d.jurnal}</b>Total Jurnal</div><div class="card stat"><b>${tot}</b>Kegiatan SKP</div>
+   <div class="card stat"><b>${d.dok.length}</b>Foto Bukti</div><div class="card stat"><b>${cnt.filter(x => x).length}/7</b>Nilai BerAKHLAK terisi</div></div>
+   <div class="two"><div class="card"><h2>Sebaran kegiatan per nilai</h2>${NILAI.map((n, i) => `<div class="bar"><span>${n}</span><div><div style="width:${cnt[i] / max * 100}%"></div></div><b>${cnt[i]}</b></div>`).join('')}</div>
+   <div class="card"><h2>Kelengkapan dokumentasi</h2><div class="bar" style="grid-template-columns:1fr 40px"><div><div style="width:${tot ? withDok / tot * 100 : 0}%;background:var(--amber)"></div></div><b>${tot ? Math.round(withDok / tot * 100) : 0}%</b></div>
+   <p class="mut">${withDok} dari ${tot} kegiatan sudah punya foto bukti.${tot - withDok > 0 ? ' Lengkapi di menu Laporan SKP.' : ''}</p></div></div>`;
+ },
+ async profil() {
+  const u = S.user;
+  return `<h1>Profil Saya</h1><div class="card" style="max-width:560px"><label>NIP</label><input value="${esc(u.nip)}" disabled>
+  <label>Nama</label><input id="pn" value="${esc(u.nama)}"><label>Jabatan</label><input id="pj" value="${esc(u.jabatan)}"><label>Unit kerja</label><input id="pu" value="${esc(u.unit)}">
+  <label>URL gambar tanda tangan (opsional)</label><input id="pt" value="${esc(u.ttd)}" placeholder="https://..."><button class="btn" style="margin-top:16px" onclick="saveProfil(this)">Simpan profil</button></div>`;
+ },
+ async jurnal() {
+  const j = await call('getJurnal', {nip:tgtNip()});
+  return `<h1>Jurnal Kegiatan</h1>${picker()}<div class="two"><div class="card"><h2>Tambah manual</h2><label>Tanggal</label><input type="date" id="jt" value="${today()}"><label>Uraian kegiatan</label><textarea id="ju" rows="3"></textarea>
+  <button class="btn" style="margin-top:12px" onclick="addJ(this)">Simpan kegiatan</button></div>
+  <div class="card"><h2>Impor</h2><label>File .txt, .csv, .xls, .xlsx (kolom 1 tanggal, kolom 2 uraian)</label><input type="file" id="jf" accept=".txt,.csv,.xls,.xlsx" onchange="impFile(this)">
+  <label>Impor teks (satu kegiatan per baris, format tanggal;uraian atau uraian saja)</label><textarea id="jx" rows="3"></textarea><button class="btn sec" style="margin-top:8px" onclick="impText(this)">Impor teks</button></div></div>
+  <div class="card tw" style="margin-top:14px"><h2>${j.length} catatan</h2><table><tr><th>Tanggal</th><th>Uraian</th><th></th></tr>
+  ${j.map(x => `<tr><td style="white-space:nowrap">${esc(x.tanggal)}</td><td>${esc(x.uraian)}</td><td><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=3 class="mut">Belum ada jurnal. Tambahkan kegiatan pertama di atas.</td></tr>'}</table></div>`;
+ },
+ async laporan() {
+  const d = S.skp = await call('getSkp', {nip:tgtNip()}); const n = NILAI[S.tab];
+  const ks = d.kegiatan.filter(k => k.nilai === n), nd = d.nilai.find(x => x.nilai === n);
+  return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row">${isAdmin() ? '<button class="btn warn" onclick="gen(this)">✦ Generate SKP</button>' : ''}<button class="btn" onclick="printSkp()">Cetak PDF</button></div></div>${picker()}
+  <div class="tabs">${NILAI.map((x, i) => `<button class="${i === S.tab ? 'on' : ''}" onclick="S.tab=${i};go('laporan')">${x}</button>`).join('')}</div>
+  <div class="card"><h2>${n.toUpperCase()}</h2><label>Deskripsi nilai</label><textarea id="nd" rows="3">${esc(nd ? nd.deskripsi : DESC[n])}</textarea>
+  <button class="btn sec sm" style="margin-top:8px" onclick="saveNilai(this)">Simpan deskripsi</button></div>
+  <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>Kegiatan</h2><button class="btn sm" onclick="editK()">+ Tambah kegiatan</button></div>
+  <table><tr><th>Kegiatan</th><th>Output</th><th>Tujuan</th><th>Foto</th><th></th></tr>
+  ${ks.map(k => { const dk = d.dok.find(x => x.kegiatanId === k.id); return `<tr><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td>
+   <td>${dk ? `<img class="thumb" src="${img(dk.fileId)}">` : ''}<br><label class="btn sec sm" style="display:inline-block;margin:4px 0 0;font-weight:600">${dk ? 'Ganti' : 'Unggah'}<input type="file" accept="image/*" hidden onchange="upFoto(this,'${k.id}')"></label></td>
+   <td style="white-space:nowrap"><button class="btn sec sm" onclick="editK('${k.id}')">Edit</button> <button class="btn del sm" onclick="delK('${k.id}')">Hapus</button></td></tr>`; }).join('') || '<tr><td colspan=5 class="mut">Belum ada kegiatan untuk nilai ini. Tambah manual atau minta admin menjalankan Generate SKP.</td></tr>'}</table>
+  <p class="mut">Hasil AI bisa diedit. Periksa kembali sebelum dicetak.</p></div>`;
+ },
+ async pass() {
+  return `<h1>Ganti Password</h1><div class="card" style="max-width:420px"><label>Password lama</label><input type="password" id="p1"><label>Password baru (min. 6 karakter)</label><input type="password" id="p2">
+  <label>Ulangi password baru</label><input type="password" id="p3"><button class="btn" style="margin-top:16px" onclick="chPw(this)">Ganti password</button></div>`;
+ },
+ async pegawai() {
+  S.emps = await call('listEmp');
+  return `<div class="row" style="justify-content:space-between"><h1>Master Pegawai</h1><button class="btn" onclick="editE()">+ Tambah pegawai</button></div>
+  <div class="card tw"><table><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Unit</th><th>Role</th><th>Status</th><th></th></tr>
+  ${S.emps.map(e => `<tr><td>${esc(e.nip)}</td><td>${esc(e.nama)}</td><td>${esc(e.jabatan)}</td><td>${esc(e.unit)}</td><td>${esc(e.role)}</td>
+  <td><span class="pill ${e.status === 'Aktif' ? '' : 'off'}">${esc(e.status)}</span></td><td style="white-space:nowrap">
+  <button class="btn sec sm" onclick="editE('${esc(e.nip)}')">Edit</button> <button class="btn sec sm" onclick="resetE('${esc(e.nip)}')">Reset</button>
+  <button class="btn ${e.status === 'Aktif' ? 'del' : ''} sm" onclick="togE('${esc(e.nip)}')">${e.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button></td></tr>`).join('')}</table></div>`;
+ },
+ async setting() {
+  S.set = await call('getSettings'); const f = [['pemerintah','Baris 1 kop'],['dinas','Baris 2 kop'],['sekolah','Nama sekolah'],['alamat','Alamat'],['telepon','Telepon'],['kota','Kota tanda tangan'],['tanggal','Tanggal laporan (kosong = hari ini)'],['logo','URL logo']];
+  return `<h1>Pengaturan Laporan</h1><div class="card" style="max-width:600px">${f.map(x => `<label>${x[1]}</label><input data-k="${x[0]}" value="${esc(S.set[x[0]])}">`).join('')}
+  <button class="btn" style="margin-top:16px" onclick="saveSet(this)">Simpan pengaturan</button></div>`;
+ }
+};
+
+// ====== Aksi ======
+const val = id => $('#' + id).value.trim();
+async function saveProfil(b) { busy(b, 'Menyimpan...', async () => { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:val('pt')}; await call('saveProfile', o); Object.assign(S.user, o); toast('Profil berhasil disimpan.'); }); }
+async function chPw(b) { if (val('p2') !== val('p3')) return toast('Konfirmasi password tidak sama', 1); busy(b, 'Menyimpan...', async () => { await call('changePw', {lama:val('p1'), baru:val('p2')}); toast('Password berhasil diganti.'); go('pass'); }); }
+async function addJ(b) { if (!val('ju')) return toast('Uraian wajib diisi', 1); busy(b, 'Menyimpan...', async () => { await call('addJurnal', {nip:tgtNip(), items:[{tanggal:val('jt'), uraian:val('ju')}]}); toast('Kegiatan disimpan.'); go('jurnal'); }); }
+async function delJ(id) { if (!await confirmBox('Hapus catatan jurnal ini?')) return; try { await call('delJurnal', {id, nip:tgtNip()}); toast('Jurnal dihapus.'); go('jurnal'); } catch (e) { toast(e.message, 1); } }
+function nd(v) {
+  let d; if (typeof v === 'number') d = new Date(Math.round((v - 25569) * 864e5));
+  else { const m = String(v).trim().match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/); d = m ? new Date(Date.UTC(+m[3], m[2] - 1, +m[1])) : new Date(v); }
+  return isNaN(d) ? today() : d.toISOString().slice(0, 10);
+}
+function parseLines(txt) {
+  return txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^([^;,\t]{6,12})[;,\t]\s*(.+)$/); if (m && !isNaN(new Date(nd(m[1])).getTime()) && /\d/.test(m[1])) return {tanggal:nd(m[1]), uraian:m[2].replace(/^"|"$/g, '')};
+    return {tanggal:today(), uraian:l};
+  });
+}
+async function sendItems(items) { if (!items.length) return toast('Tidak ada data yang terbaca', 1); await call('addJurnal', {nip:tgtNip(), items}); toast(items.length + ' kegiatan diimpor.'); go('jurnal'); }
+async function impText(b) { busy(b, 'Mengimpor...', () => sendItems(parseLines($('#jx').value))); }
+async function impFile(inp) {
+  const f = inp.files[0]; if (!f) return;
+  try {
+    let items;
+    if (/\.(xlsx?|XLSX?)$/.test(f.name)) {
+      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'}); const r = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:true});
+      items = r.filter(x => x.length).map(x => x.length > 1 ? {tanggal:nd(x[0]), uraian:String(x[1] ?? '')} : {tanggal:today(), uraian:String(x[0])}).filter(x => x.uraian && !/^uraian/i.test(x.uraian));
+    } else items = parseLines(await f.text()).filter(x => !/^(tanggal|uraian)/i.test(x.uraian));
+    await sendItems(items);
+  } catch (e) { toast('Gagal impor: ' + e.message, 1); }
+}
+async function saveNilai(b) { busy(b, 'Menyimpan...', async () => { await call('saveNilai', {nip:tgtNip(), nilai:NILAI[S.tab], deskripsi:val('nd')}); toast('Deskripsi disimpan.'); }); }
+function editK(id) {
+  const k = (S.skp.kegiatan.find(x => x.id === id)) || {};
+  modal(`<h2>${id ? 'Edit' : 'Tambah'} kegiatan</h2><label>Kegiatan</label><textarea id="k1" rows="2">${esc(k.kegiatan)}</textarea><label>Output yang dihasilkan</label><input id="k2" value="${esc(k.output)}">
+  <label>Tujuan</label><input id="k3" value="${esc(k.tujuan)}"><label>Deskripsi</label><textarea id="k4" rows="3">${esc(k.deskripsi)}</textarea>
+  <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="ks">Simpan</button></div>`);
+  $('#ks').onclick = () => { if (!val('k1')) return toast('Kegiatan wajib diisi', 1); busy($('#ks'), 'Menyimpan...', async () => { await call('saveKegiatan', {id, nip:tgtNip(), nilai:NILAI[S.tab], kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}); closeM(); toast('Kegiatan disimpan.'); go('laporan'); }); };
+}
+async function delK(id) { if (!await confirmBox('Hapus kegiatan ini beserta foto buktinya?')) return; try { await call('delKegiatan', {id, nip:tgtNip()}); toast('Kegiatan dihapus.'); go('laporan'); } catch (e) { toast(e.message, 1); } }
+function compress(file) {
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => { const s = Math.min(1, 1000 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = im.width * s; c.height = im.height * s; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .72)); }; im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file); });
+}
+async function upFoto(inp, kid) {
+  const f = inp.files[0]; if (!f) return; toast('Mengunggah foto...');
+  try { await call('uploadFoto', {nip:tgtNip(), nilai:NILAI[S.tab], kegiatanId:kid, data:await compress(f)}); toast('Foto bukti berhasil diunggah.'); go('laporan'); } catch (e) { toast(e.message, 1); }
+}
+async function gen(b) {
+  const has = S.skp.kegiatan.length;
+  if (has && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP pegawai ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
+  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip()}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); go('laporan'); });
+}
+function editE(nip) {
+  const e = S.emps.find(x => x.nip == nip) || {role:'Pegawai', status:'Aktif'};
+  modal(`<h2>${nip ? 'Edit' : 'Tambah'} pegawai</h2><label>NIP</label><input id="e1" value="${esc(e.nip)}"><label>Nama</label><input id="e2" value="${esc(e.nama)}">
+  <label>Jabatan</label><input id="e3" value="${esc(e.jabatan)}"><label>Unit kerja</label><input id="e4" value="${esc(e.unit)}">
+  <div class="two"><div><label>Role</label><select id="e5"><option ${e.role === 'Pegawai' ? 'selected' : ''}>Pegawai</option><option ${e.role === 'Admin' ? 'selected' : ''}>Admin</option></select></div>
+  <div><label>Status</label><select id="e6"><option ${e.status === 'Aktif' ? 'selected' : ''}>Aktif</option><option ${e.status === 'Nonaktif' ? 'selected' : ''}>Nonaktif</option></select></div></div>
+  ${nip ? '' : '<p class="mut">Password awal: 123456</p>'}<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="es">Simpan</button></div>`);
+  $('#es').onclick = () => { if (!val('e1') || !val('e2')) return toast('NIP dan nama wajib diisi', 1); busy($('#es'), 'Menyimpan...', async () => { await call('saveEmp', {old:nip, nip:val('e1'), nama:val('e2'), jabatan:val('e3'), unit:val('e4'), role:val('e5'), status:val('e6')}); closeM(); toast('Data pegawai disimpan.'); go('pegawai'); }); };
+}
+async function resetE(nip) { if (!await confirmBox('Reset password pegawai ini ke 123456?')) return; try { toast(await call('resetPw', {nip})); } catch (e) { toast(e.message, 1); } }
+async function togE(nip) { try { await call('toggleEmp', {nip}); toast('Status pegawai diubah.'); go('pegawai'); } catch (e) { toast(e.message, 1); } }
+async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; document.querySelectorAll('[data-k]').forEach(i => d[i.dataset.k] = i.value.trim()); await call('saveSettings', {data:d}); S.set = d; toast('Pengaturan disimpan.'); }); }
+
+// ====== Cetak PDF (A4) ======
+async function printSkp() {
+  try {
+    const d = await call('getSkp', {nip:tgtNip()}); const p = isAdmin() ? S.emps.find(e => e.nip == tgtNip()) : S.user, st = S.set;
+    const tgl = st.tanggal || new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+    const kop = `<div class="kop">${st.logo ? `<img src="${esc(st.logo)}">` : ''}<div>${esc(st.pemerintah)}<br>${esc(st.dinas)}<br><b style="font-size:14pt">${esc(st.sekolah)}</b><br><small>${esc(st.alamat)} Telp. ${esc(st.telepon)}</small></div></div>`;
+    const used = NILAI.filter(n => d.kegiatan.some(k => k.nilai === n)); if (!used.length) return toast('Belum ada kegiatan SKP untuk dicetak', 1);
+    let h = '';
+    used.forEach((n, i) => {
+      const ks = d.kegiatan.filter(k => k.nilai === n), nl = d.nilai.find(x => x.nilai === n);
+      h += `<div class="pg">${kop}<h3 style="text-align:center">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(nl ? nl.deskripsi : DESC[n])}</p>
+      <table><tr><th>No.</th><th>Kegiatan</th><th>Output yang dihasilkan</th><th>Tujuan</th></tr>${ks.map((k, j) => `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td></tr>`).join('')}</table>
+      <h4 style="text-align:center;margin-top:18px">DOKUMENTASI KEGIATAN</h4><table><tr><th>No.</th><th>Kegiatan</th><th>Dokumentasi</th></tr>
+      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id); return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${x ? `<img class="d" src="${img(x.fileId)}">` : ''}</td></tr>`; }).join('')}</table>
+      ${i === used.length - 1 ? `<div class="ttd">${esc(st.kota)}, ${esc(tgl)}<br>${esc(p.jabatan)}<br>${p.ttd ? `<img src="${esc(p.ttd)}"><br>` : '<br><br><br>'}<b><u>${esc(p.nama)}</u></b><br>NIP. ${esc(p.nip)}</div>` : ''}</div>`;
+    });
+    $('#print').innerHTML = h; setTimeout(() => print(), 700);
+  } catch (e) { toast(e.message, 1); }
+}
+
+// ====== Mulai ======
+(async function () {
+  try { if (S.token) { S.user = await call('me'); await boot2(); } else loginView(); } catch (e) { loginView(); }
+  $('#boot').style.opacity = 0; setTimeout(() => $('#boot').remove(), 400);
+})();
+</script>
+</body>
+</html>
