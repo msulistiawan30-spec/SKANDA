@@ -26,7 +26,11 @@ h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 10px}.mut{color:va
 .login{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
 .hero{background:var(--pine);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:flex-end}
 .hero b{font-size:clamp(44px,7vw,84px);letter-spacing:-2px;line-height:1;font-weight:800}
-.hero p{max-width:380px;opacity:.85}.hlogo{width:112px;height:auto;margin-bottom:22px;align-self:flex-start}.hero i{display:block;width:70px;height:6px;background:var(--amber);margin:18px 0;border-radius:3px}
+.hero p{max-width:380px;opacity:.85}.hlogo{width:124px;height:auto;margin-bottom:22px;align-self:flex-start;filter:drop-shadow(0 10px 16px #0007);animation:spin3d 1.5s cubic-bezier(.2,.8,.2,1) both,floaty 4.5s ease-in-out 1.5s infinite}
+@keyframes spin3d{from{transform:perspective(600px) rotateY(-540deg) scale(.4);opacity:0}to{transform:perspective(600px) rotateY(0) scale(1);opacity:1}}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-12px) rotate(1.5deg)}}
+.bootlogo{width:112px;animation:pulse 1.3s ease-in-out infinite;filter:drop-shadow(0 8px 14px #0006)}@keyframes pulse{50%{transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.hlogo,.bootlogo{animation:none}}.hero i{display:block;width:70px;height:6px;background:var(--amber);margin:18px 0;border-radius:3px}
 .lform{display:grid;place-items:center;padding:24px}.lform form{width:100%;max-width:340px}
 .shell{display:grid;grid-template-columns:250px 1fr;min-height:100%}
 aside{background:var(--ink);color:#d9e6e4;padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;overflow:auto}
@@ -35,7 +39,7 @@ aside a{padding:10px 12px;border-radius:9px;cursor:pointer;display:flex;gap:10px
 aside a:hover{background:rgba(255,255,255,.08)}aside a.on{background:var(--amber);color:#2a1c00;font-weight:700}
 .who{margin-top:auto;padding:10px;font-size:12px;border-top:1px solid rgba(255,255,255,.12)}
 main{padding:24px;min-width:0}.top{display:none}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:16px 0}
 .stat b{display:block;font-size:30px;font-weight:800;color:var(--pine)}
 .bar{display:grid;grid-template-columns:150px 1fr 30px;gap:10px;align-items:center;margin:8px 0}
 .bar div div{height:12px;background:var(--pine);border-radius:6px;min-width:3px}.bar div{background:var(--mist);border-radius:6px}
@@ -45,7 +49,7 @@ main{padding:24px;min-width:0}.top{display:none}
 .tw{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{font-size:12px;color:var(--mut)}
 .pill{padding:2px 9px;border-radius:12px;font-size:11.5px;font-weight:700;background:#dcefe6;color:var(--ok)}.pill.off{background:#f7ddd2;color:var(--red)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
 .sk{height:16px;border-radius:6px;background:linear-gradient(90deg,#e3ebea,#f3f7f6,#e3ebea);background-size:200% 100%;animation:sh 1.2s infinite;margin:10px 0}
 @keyframes sh{to{background-position:-200% 0}}
 #toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:90}
@@ -62,6 +66,21 @@ th{font-size:12px;color:var(--mut)}
  aside{position:fixed;left:0;top:0;z-index:40;width:260px;transform:translateX(-100%);transition:transform .25s}aside.open{transform:none}
  #ov{position:fixed;inset:0;background:#0006;z-index:35;display:none}#ov.on{display:block}
  .grid4{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}main{padding:14px}.bar{grid-template-columns:110px 1fr 24px}}
+@media(max-width:700px){
+ input,select,textarea{font-size:16px}h1{font-size:19px}.card{padding:14px}
+ .grid4{grid-template-columns:1fr 1fr;gap:10px}.stat b{font-size:24px}
+ .row>.btn{flex:1 1 auto}
+ #modal{place-items:end center;padding:0}#modal>div{border-radius:16px 16px 0 0;max-width:none}
+ #toast{left:12px;right:12px;bottom:12px}
+ .hero{min-height:240px;padding:24px}.hlogo{width:84px}
+ table.rt tr:has(th),table.rt th{display:none}
+ table.rt,table.rt tbody{display:block}
+ table.rt tr{display:block;border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin-bottom:10px}
+ table.rt td{display:flex;gap:12px;justify-content:space-between;align-items:center;border:0;padding:6px 0;text-align:right}
+ table.rt td::before{content:attr(data-label);font-weight:700;color:var(--mut);text-align:left;flex:0 0 30%}
+ table.rt td[data-label=""]{justify-content:flex-end;flex-wrap:wrap}table.rt td[data-label=""]::before{display:none}
+ table.rt td select{min-width:0!important;width:100%}
+}
 @media print{
  @page{size:A4;margin:0}
  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}body>*:not(#print){display:none!important}
@@ -71,7 +90,7 @@ th{font-size:12px;color:var(--mut)}
  #print .wrap>tbody>tr>td.in{padding:0 15mm;border:0}
  #print .kop{position:relative;min-height:72px;text-align:center;border-bottom:3px double #000;padding-bottom:6px;margin-bottom:14px;line-height:1.3}#print .kop img{position:absolute;left:0;top:0;height:72px}
  #print .tb{border:1px solid #000;margin-bottom:6px}#print .tb th,#print .tb td{border:1px solid #000;padding:5px 7px;color:#000}#print .tb th{background:#eee}#print tr{page-break-inside:avoid}
- #print img.d{max-width:60mm;max-height:45mm}#print .ttd{margin:28px 0 0 auto;width:75mm;text-align:center;page-break-inside:avoid}#print .ttd img{height:60px}
+ #print img.d{max-width:60mm;max-height:45mm}#print .ttd{margin:28px 0 0 auto;width:80mm;text-align:center;page-break-inside:avoid}#print .ttd img{height:30mm;max-width:72mm;object-fit:contain}
 }
 </style>
 </head>
@@ -83,23 +102,24 @@ th{font-size:12px;color:var(--mut)}
 const API_URL = 'https://script.google.com/macros/s/AKfycbz8ZB8uigR-TVRnQXTHD1lEFthr8c9dhqIOBAp0vdvFCxqrWPNl26An7yQW57xGWbjq/exec';
 // =================================================================
 const LOGO = 'data:image/png;base64,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';
+document.getElementById('boot').innerHTML = '<img class="bootlogo" src="' + LOGO + '" alt="">';
 const NILAI = ['Berorientasi Pelayanan','Akuntabel','Kompeten','Harmonis','Loyal','Adaptif','Kolaboratif'];
 const DESC = {
- 'Berorientasi Pelayanan':'Memahami dan memenuhi kebutuhan masyarakat, ramah, cekatan, solutif, dan dapat diandalkan, serta melakukan perbaikan tiada henti.',
- 'Akuntabel':'Melaksanakan tugas dengan jujur, bertanggung jawab, cermat, serta disiplin, dan berintegritas tinggi.',
- 'Kompeten':'Terus belajar dan mengembangkan kapabilitas, melaksanakan tugas dengan kualitas terbaik, dan membantu orang lain belajar.',
- 'Harmonis':'Menghargai setiap orang apapun latar belakangnya, suka menolong orang lain, dan membangun lingkungan kerja yang kondusif.',
- 'Loyal':'Memegang teguh ideologi Pancasila, UUD 1945, setia kepada NKRI, serta menjaga nama baik sesama ASN, pimpinan, instansi, dan negara.',
- 'Adaptif':'Terus berinovasi dan mengembangkan kreativitas, bertindak proaktif, serta cepat menyesuaikan diri menghadapi perubahan.',
- 'Kolaboratif':'Memberi kesempatan kepada berbagai pihak untuk berkontribusi, terbuka bekerja sama, dan menggerakkan pemanfaatan sumber daya bersama.'};
+ 'Berorientasi Pelayanan':'Nilai Berorientasi Pelayanan dalam Core Values ASN bagi Tenaga Kependidikan pada bagian Buku Induk Siswa berfokus pada pemberian layanan administrasi data peserta didik yang cepat, akurat, dan transparan kepada pihak yang membutuhkan, seperti siswa, wali kelas, guru, dan manajemen sekolah.',
+ 'Akuntabel':'Dalam Core Values ASN, Akuntabel berarti bertanggung jawab atas kepercayaan yang diberikan. Bagi Operator Layanan Operasional pada bagian Buku Induk Siswa, akuntabilitas diwujudkan melalui pengelolaan data peserta didik yang akurat, transparan, serta dapat dipertanggungjawabkan sesuai dengan ketentuan administrasi sekolah.',
+ 'Kompeten':'Nilai Kompeten dalam Core Values ASN menekankan pentingnya terus belajar dan mengembangkan kemampuan dalam melaksanakan tugas. Bagi Operator Layanan Operasional pada bagian Buku Induk Siswa, kompetensi diwujudkan melalui peningkatan kemampuan dalam pengelolaan data peserta didik, pengarsipan administrasi sekolah, serta pemanfaatan teknologi informasi untuk mendukung pelayanan administrasi yang efektif dan akurat.',
+ 'Harmonis':'Saling peduli dan menghargai perbedaan di lingkungan sekolah. Menciptakan suasana ruang administrasi yang inklusif. Tidak membeda-bedakan kualitas layanan antara Guru PNS, PPPK, maupun Guru Honorer (GTT). Menjadi penengah jika terjadi konflik kepentingan dan selalu mengedepankan etika komunikasi yang santun. Berkoordinasi dengan baik dalam pekerjaan.',
+ 'Loyal':'Nilai Loyal bagi Tenaga Kependidikan di bagian Kepegawaian SMK sangat berkaitan dengan integritas, dedikasi, dan kepatuhan terhadap rahasia negara serta nama baik instansi. Mengingat bagian kepegawaian memegang data sensitif guru dan staf, loyalitas di sini diuji melalui cara Anda menjaga kepercayaan tersebut.',
+ 'Adaptif':'Seorang operator layanan operasional pada bagian Buku Induk Siswa dituntut mampu beradaptasi dengan perubahan regulasi administrasi pendidikan, sistem digitalisasi data, serta kebutuhan layanan informasi peserta didik. Adaptif berarti mampu menyesuaikan prosedur kerja dengan perkembangan sistem pendataan (baik manual maupun berbasis aplikasi), serta memastikan akurasi dan keamanan data siswa.',
+ 'Kolaboratif':'Nilai Kolaboratif bagi Tenaga Kependidikan (Tendik) bagian Kepegawaian di SMK sangat penting karena urusan data pegawai tidak bisa dikerjakan sendirian. Anda harus bekerja sama dengan operator Dapodik, Bendahara, Pengelola Sekolah, Dinas Pendidikan, hingga mitra industri (untuk guru tamu).'};
 const NAV_EMP = [['dash','Dashboard'],['profil','Profil Saya'],['jurnal','Jurnal Kegiatan'],['laporan','Laporan SKP'],['pass','Ganti Password']];
 const NAV_ADMIN = [['pegawai','Master Pegawai'],['setting','Pengaturan Laporan']];
 const loc = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString();
 const S = {token:localStorage.skToken||'', user:null, view:'dash', tgt:'', tab:0, emps:[], set:{}, bulan:loc().slice(0,7)};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const img = id => 'https://drive.google.com/thumbnail?id=' + id + '&sz=w900';
-const thumb = id => `<img class="thumb" src="${img(id)}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/${id}=w300'">`;
+const img = id => String(id).startsWith('data:') ? id : 'https://drive.google.com/thumbnail?id=' + id + '&sz=w900';
+const thumb = id => String(id).startsWith('data:') ? `<img class="thumb" src="${id}">` : `<img class="thumb" src="${img(id)}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/${id}=w300'">`;
 const today = () => loc().slice(0,10);
 
 async function call(action, data = {}) {
@@ -196,22 +216,21 @@ const VIEWS = {
   <label>Impor teks (satu kegiatan per baris, format tanggal;uraian atau uraian saja)</label><textarea id="jx" rows="3"></textarea><button class="btn sec" style="margin-top:8px" onclick="impText(this)">Impor teks</button></div></div>
   <p class="mut">Setiap jurnal yang masuk otomatis dikelompokkan AI ke salah satu nilai BerAKHLAK. Pilihan bisa Anda ubah di tabel.</p>
   <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>${j.length} catatan bulan ini</h2>${kosong ? `<button class="btn warn sm" onclick="classify(this)">✦ Kelompokkan ${kosong} jurnal dengan AI</button>` : ''}</div>
-  <table><tr><th>Tanggal</th><th>Uraian</th><th>Nilai BerAKHLAK</th><th></th></tr>
-  ${j.map(x => `<tr><td style="white-space:nowrap">${esc(x.tanggal)}</td><td>${esc(x.uraian)}</td><td><select style="min-width:170px" onchange="setJN('${x.id}',this.value)"><option value="">Belum dikelompokkan</option>${NILAI.map(n => `<option ${x.nilai === n ? 'selected' : ''}>${n}</option>`).join('')}</select></td><td><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=4 class="mut">Belum ada jurnal di bulan ini. Tambahkan kegiatan atau pilih bulan lain.</td></tr>'}</table></div>`;
+  <table class="rt"><tr><th>Tanggal</th><th>Uraian</th><th>Nilai BerAKHLAK</th><th></th></tr>
+  ${j.map(x => `<tr><td data-label="Tanggal" style="white-space:nowrap">${esc(x.tanggal)}</td><td data-label="Uraian">${esc(x.uraian)}</td><td data-label="Nilai"><select style="min-width:170px" onchange="setJN('${x.id}',this.value)"><option value="">Belum dikelompokkan</option>${NILAI.map(n => `<option ${x.nilai === n ? 'selected' : ''}>${n}</option>`).join('')}</select></td><td data-label=""><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=4 class="mut">Belum ada jurnal di bulan ini. Tambahkan kegiatan atau pilih bulan lain.</td></tr>'}</table></div>`;
  },
  async laporan() {
   const d = S.skp = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}); const n = NILAI[S.tab];
   const ks = d.kegiatan.filter(k => k.nilai === n), nd = d.nilai.find(x => x.nilai === n);
   return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row"><button class="btn warn" onclick="gen(this)">✦ Generate SKP</button><button class="btn" onclick="printSkp(this)">Cetak PDF</button></div></div>${picker()}${monthPick()}
-  <p class="mut" style="margin:0">Jurnal bulan ini: ${d.jurnalBulan}. Generate SKP menyusun kegiatan, output, dan tujuan dari jurnal tersebut.</p>
+  <p class="mut" style="margin:0">Jurnal bulan ini: ${d.jurnalBulan}. Generate SKP menyusun kegiatan, output, dan tujuan dari jurnal. Cetak PDF hanya mencetak tab yang sedang dipilih (${n}).</p>
   <div class="tabs">${NILAI.map((x, i) => `<button class="${i === S.tab ? 'on' : ''}" onclick="S.tab=${i};go('laporan')">${x}</button>`).join('')}</div>
-  <div class="card"><h2>${n.toUpperCase()}</h2><label>Deskripsi nilai</label><textarea id="nd" rows="3">${esc(nd ? nd.deskripsi : DESC[n])}</textarea>
-  <button class="btn sec sm" style="margin-top:8px" onclick="saveNilai(this)">Simpan deskripsi</button></div>
+  <div class="card"><h2>${n.toUpperCase()}</h2><p style="margin:0;text-align:justify">${esc(DESC[n])}</p></div>
   <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>Kegiatan</h2><button class="btn sm" onclick="editK()">+ Tambah kegiatan</button></div>
-  <table><tr><th>Kegiatan</th><th>Output</th><th>Tujuan</th><th>Foto</th><th></th></tr>
-  ${ks.map(k => { const dk = d.dok.find(x => x.kegiatanId === k.id); return `<tr><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td>
-   <td>${dk ? thumb(dk.fileId) : ''}<br><label class="btn sec sm" style="display:inline-block;margin:4px 0 0;font-weight:600">${dk ? 'Ganti' : 'Unggah'}<input type="file" accept="image/*" hidden onchange="upFoto(this,'${k.id}')"></label></td>
-   <td style="white-space:nowrap"><button class="btn sec sm" onclick="editK('${k.id}')">Edit</button> <button class="btn del sm" onclick="delK('${k.id}')">Hapus</button></td></tr>`; }).join('') || '<tr><td colspan=5 class="mut">Belum ada kegiatan untuk nilai ini di bulan ini. Tambah manual atau klik Generate SKP.</td></tr>'}</table>
+  <table class="rt"><tr><th>Kegiatan</th><th>Output</th><th>Tujuan</th><th>Foto</th><th></th></tr>
+  ${ks.map(k => { const dk = d.dok.find(x => x.kegiatanId === k.id); return `<tr><td data-label="Kegiatan">${esc(k.kegiatan)}</td><td data-label="Output">${esc(k.output)}</td><td data-label="Tujuan">${esc(k.tujuan)}</td>
+   <td data-label="Foto">${dk ? thumb(dk.fileId) : ''}<br><label class="btn sec sm" style="display:inline-block;margin:4px 0 0;font-weight:600">${dk ? 'Ganti' : 'Unggah'}<input type="file" accept="image/*" hidden onchange="upFoto(this,'${k.id}')"></label></td>
+   <td data-label="" style="white-space:nowrap"><button class="btn sec sm" onclick="editK('${k.id}')">Edit</button> <button class="btn del sm" onclick="delK('${k.id}')">Hapus</button></td></tr>`; }).join('') || '<tr><td colspan=5 class="mut">Belum ada kegiatan untuk nilai ini di bulan ini. Tambah manual atau klik Generate SKP.</td></tr>'}</table>
   <p class="mut">Hasil AI bisa diedit. Periksa kembali sebelum dicetak.</p></div>`;
  },
  async pass() {
@@ -221,9 +240,9 @@ const VIEWS = {
  async pegawai() {
   S.emps = await call('listEmp');
   return `<div class="row" style="justify-content:space-between"><h1>Master Pegawai</h1><button class="btn" onclick="editE()">+ Tambah pegawai</button></div>
-  <div class="card tw"><table><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Unit</th><th>Role</th><th>Status</th><th></th></tr>
-  ${S.emps.map(e => `<tr><td>${esc(e.nip)}</td><td>${esc(e.nama)}</td><td>${esc(e.jabatan)}</td><td>${esc(e.unit)}</td><td>${esc(e.role)}</td>
-  <td><span class="pill ${e.status === 'Aktif' ? '' : 'off'}">${esc(e.status)}</span></td><td style="white-space:nowrap">
+  <div class="card tw"><table class="rt"><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Unit</th><th>Role</th><th>Status</th><th></th></tr>
+  ${S.emps.map(e => `<tr><td data-label="NIP">${esc(e.nip)}</td><td data-label="Nama">${esc(e.nama)}</td><td data-label="Jabatan">${esc(e.jabatan)}</td><td data-label="Unit">${esc(e.unit)}</td><td data-label="Role">${esc(e.role)}</td>
+  <td data-label="Status"><span class="pill ${e.status === 'Aktif' ? '' : 'off'}">${esc(e.status)}</span></td><td data-label="" style="white-space:nowrap">
   <button class="btn sec sm" onclick="editE('${esc(e.nip)}')">Edit</button> <button class="btn sec sm" onclick="resetE('${esc(e.nip)}')">Reset</button>
   <button class="btn ${e.status === 'Aktif' ? 'del' : ''} sm" onclick="togE('${esc(e.nip)}')">${e.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button></td></tr>`).join('')}</table></div>`;
  },
@@ -259,7 +278,7 @@ function smallImg(file, mw, mh, clear) {
 }
 async function saveProf() { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:S.user.ttd || ''}; await call('saveProfile', o); Object.assign(S.user, o); }
 async function saveProfil(b) { busy(b, 'Menyimpan...', async () => { await saveProf(); toast('Profil berhasil disimpan.'); }); }
-async function upTtd(inp) { const f = inp.files[0]; if (!f) return; try { S.user.ttd = await smallImg(f, 420, 170, true); await saveProf(); toast('Tanda tangan berhasil disimpan.'); go('profil'); } catch (e) { toast(e.message, 1); } }
+async function upTtd(inp) { const f = inp.files[0]; if (!f) return; try { S.user.ttd = await smallImg(f, 560, 220, true); await saveProf(); toast('Tanda tangan berhasil disimpan.'); go('profil'); } catch (e) { toast(e.message, 1); } }
 async function delTtd() { S.user.ttd = ''; try { await saveProf(); toast('Tanda tangan dihapus.'); go('profil'); } catch (e) { toast(e.message, 1); } }
 async function upLogo(inp) { const f = inp.files[0]; if (!f) return; try { const u = await smallImg(f, 220, 220, false); await call('saveSettings', {data:{logo:u}}); S.set.logo = u; toast('Logo kop disimpan.'); go('setting'); } catch (e) { toast(e.message, 1); } }
 async function delLogo() { try { await call('saveSettings', {data:{logo:''}}); S.set.logo = ''; toast('Logo dihapus.'); go('setting'); } catch (e) { toast(e.message, 1); } }
@@ -310,12 +329,18 @@ function editK(id) {
   $('#ks').onclick = () => { if (!val('k1')) return toast('Kegiatan wajib diisi', 1); busy($('#ks'), 'Menyimpan...', async () => { await call('saveKegiatan', {id, bulan:S.bulan, nip:tgtNip(), nilai:NILAI[S.tab], kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}); closeM(); toast('Kegiatan disimpan.'); go('laporan'); }); };
 }
 async function delK(id) { if (!await confirmBox('Hapus kegiatan ini beserta foto buktinya?')) return; try { await call('delKegiatan', {id, nip:tgtNip()}); toast('Kegiatan dihapus.'); go('laporan'); } catch (e) { toast(e.message, 1); } }
-function compress(file) {
-  return new Promise((res, rej) => { const im = new Image(); im.onload = () => { const s = Math.min(1, 1000 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = im.width * s; c.height = im.height * s; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .72)); }; im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file); });
+function compress(file, mx = 1000, q = .72) {
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => { const s = Math.min(1, mx / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = im.width * s; c.height = im.height * s; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', q)); }; im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file); });
 }
 async function upFoto(inp, kid) {
   const f = inp.files[0]; if (!f) return; toast('Mengunggah foto...');
-  try { await call('uploadFoto', {nip:tgtNip(), nilai:NILAI[S.tab], kegiatanId:kid, data:await compress(f)}); toast('Foto bukti berhasil diunggah.'); go('laporan'); } catch (e) { toast(e.message, 1); }
+  try {
+    const big = await compress(f); let small = '';
+    for (const [m, q] of [[560, .6], [440, .5], [340, .45], [260, .4]]) { small = await compress(f, m, q); if (small.length < 45000) break; }
+    if (small.length >= 45000) small = '';
+    const r = await call('uploadFoto', {nip:tgtNip(), nilai:NILAI[S.tab], kegiatanId:kid, data:big, small});
+    toast(r.mode === 'sheet' ? 'Foto tersimpan (mode ringan karena izin Drive belum aktif).' : 'Foto bukti berhasil diunggah.'); go('laporan');
+  } catch (e) { toast(e.message, 1); }
 }
 async function gen(b) {
   if (S.skp.kegiatan.length && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP bulan ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
@@ -339,9 +364,9 @@ const wrap = h => `<table class="wrap"><thead><tr><td><div class="sp"></div></td
 async function printSkp(b) {
   busy(b, 'Menyiapkan...', async () => {
     const d = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}), st = S.set = await call('getSettings'), p = d.emp;
-    const used = NILAI.filter(n => d.kegiatan.some(k => k.nilai === n));
-    if (!used.length) throw new Error('Belum ada kegiatan SKP bulan ini untuk dicetak');
-    const ids = d.dok.map(x => x.fileId), foto = {};
+    const used = [NILAI[S.tab]].filter(n => d.kegiatan.some(k => k.nilai === n));
+    if (!used.length) throw new Error('Belum ada kegiatan pada nilai ' + NILAI[S.tab] + ' di bulan ini');
+    const ids = d.dok.filter(x => d.kegiatan.some(k => k.id === x.kegiatanId && k.nilai === used[0])).map(x => x.fileId).filter(i => !String(i).startsWith('data:')), foto = {};
     for (let i = 0; i < ids.length; i += 5) Object.assign(foto, await call('fotoData', {nip:tgtNip(), ids:ids.slice(i, i + 5)}));
     const [y, m] = S.bulan.split('-').map(Number), tgl = new Date(y, m, 0).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const kop = `<div class="kop"><img src="${st.logo || LOGO}"><div>${esc(st.pemerintah)}<br>${esc(st.dinas)}<br><b style="font-size:14pt">${esc(st.sekolah)}</b><br><small>${esc(st.alamat)} Telp. ${esc(st.telepon)}</small></div></div>`;
@@ -349,15 +374,15 @@ async function printSkp(b) {
     let h = '';
     used.forEach((n, i) => {
       const ks = d.kegiatan.filter(k => k.nilai === n), nl = d.nilai.find(x => x.nilai === n);
-      h += wrap(`${kop}<h3 style="text-align:center;margin:0 0 8px">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(nl ? nl.deskripsi : DESC[n])}</p>
+      h += wrap(`${kop}<h3 style="text-align:center;margin:0 0 8px">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(DESC[n])}</p>
       <table class="tb"><tr><th style="width:7%">No.</th><th>Kegiatan</th><th>Output yang dihasilkan</th><th>Tujuan</th></tr>${ks.map((k, j) => `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td></tr>`).join('')}</table>
       <h4 style="text-align:center;margin:18px 0 8px">DOKUMENTASI KEGIATAN</h4><table class="tb"><tr><th style="width:7%">No.</th><th style="width:38%">Kegiatan</th><th>Dokumentasi</th></tr>
-      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id), f = x && foto[x.fileId]; return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${f ? `<img class="d" src="${f}">` : ''}</td></tr>`; }).join('')}</table>
+      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id), f = x && (String(x.fileId).startsWith('data:') ? x.fileId : foto[x.fileId]); return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${f ? `<img class="d" src="${f}">` : ''}</td></tr>`; }).join('')}</table>
       ${i === used.length - 1 ? ttd : ''}`);
     });
     $('#print').innerHTML = h;
     await Promise.all([...document.querySelectorAll('#print img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; setTimeout(r, 6000); })));
-    const old = document.title; document.title = 'SKP ' + p.nama + ' ' + S.bulan;
+    const old = document.title; document.title = 'SKP ' + p.nama + ' ' + used[0] + ' ' + S.bulan;
     window.onafterprint = () => { document.title = old; $('#print').innerHTML = ''; };
     print();
   });
