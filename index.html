@@ -53,6 +53,7 @@ th{font-size:12px;color:var(--mut)}
 @keyframes in{from{transform:translateY(10px);opacity:0}}
 #modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:80;padding:14px}
 #modal.on{display:grid}#modal>div{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+.spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--pine);animation:sp .8s linear infinite;margin-bottom:10px}
 .thumb{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 #print{display:none}
 @media(max-width:860px){
@@ -62,11 +63,15 @@ th{font-size:12px;color:var(--mut)}
  #ov{position:fixed;inset:0;background:#0006;z-index:35;display:none}#ov.on{display:block}
  .grid4{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}main{padding:14px}.bar{grid-template-columns:110px 1fr 24px}}
 @media print{
- @page{size:A4;margin:15mm}body{background:#fff}body>*:not(#print){display:none!important}#print{display:block;font:12pt 'Times New Roman',serif;color:#000}
- .pg{page-break-after:always}.pg:last-of-type{page-break-after:auto}
- .kop{text-align:center;border-bottom:3px double #000;padding-bottom:6px;margin-bottom:14px;line-height:1.3}.kop img{height:60px;float:left}
- #print table{border:1px solid #000}#print th,#print td{border:1px solid #000;padding:5px 7px;color:#000}#print th{background:#eee}
- #print img.d{max-width:55mm;max-height:40mm}.ttd{margin:28px 0 0 auto;width:75mm;text-align:center;page-break-inside:avoid}.ttd img{height:60px}
+ @page{size:A4;margin:0}
+ body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}body>*:not(#print){display:none!important}
+ #print{display:block;font:12pt 'Times New Roman',serif;color:#000}
+ #print .wrap{width:100%;border-collapse:collapse;page-break-after:always}#print .wrap:last-child{page-break-after:auto}
+ #print .wrap>thead>tr>td,#print .wrap>tfoot>tr>td{padding:0;border:0}#print .sp{height:15mm}
+ #print .wrap>tbody>tr>td.in{padding:0 15mm;border:0}
+ #print .kop{position:relative;min-height:72px;text-align:center;border-bottom:3px double #000;padding-bottom:6px;margin-bottom:14px;line-height:1.3}#print .kop img{position:absolute;left:0;top:0;height:72px}
+ #print .tb{border:1px solid #000;margin-bottom:6px}#print .tb th,#print .tb td{border:1px solid #000;padding:5px 7px;color:#000}#print .tb th{background:#eee}#print tr{page-break-inside:avoid}
+ #print img.d{max-width:60mm;max-height:45mm}#print .ttd{margin:28px 0 0 auto;width:75mm;text-align:center;page-break-inside:avoid}#print .ttd img{height:60px}
 }
 </style>
 </head>
@@ -88,11 +93,13 @@ const DESC = {
  'Kolaboratif':'Memberi kesempatan kepada berbagai pihak untuk berkontribusi, terbuka bekerja sama, dan menggerakkan pemanfaatan sumber daya bersama.'};
 const NAV_EMP = [['dash','Dashboard'],['profil','Profil Saya'],['jurnal','Jurnal Kegiatan'],['laporan','Laporan SKP'],['pass','Ganti Password']];
 const NAV_ADMIN = [['pegawai','Master Pegawai'],['setting','Pengaturan Laporan']];
-const S = {token:localStorage.skToken||'', user:null, view:'dash', tgt:'', tab:0, emps:[], set:{}};
+const loc = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString();
+const S = {token:localStorage.skToken||'', user:null, view:'dash', tgt:'', tab:0, emps:[], set:{}, bulan:loc().slice(0,7)};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const img = id => 'https://drive.google.com/thumbnail?id=' + id + '&sz=w900';
-const today = () => new Date().toISOString().slice(0,10);
+const thumb = id => `<img class="thumb" src="${img(id)}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/${id}=w300'">`;
+const today = () => loc().slice(0,10);
 
 async function call(action, data = {}) {
   if (API_URL.startsWith('PASTE')) throw new Error('API_URL belum diisi di skanda.html');
@@ -174,29 +181,36 @@ const VIEWS = {
   const u = S.user;
   return `<h1>Profil Saya</h1><div class="card" style="max-width:560px"><label>NIP</label><input value="${esc(u.nip)}" disabled>
   <label>Nama</label><input id="pn" value="${esc(u.nama)}"><label>Jabatan</label><input id="pj" value="${esc(u.jabatan)}"><label>Unit kerja</label><input id="pu" value="${esc(u.unit)}">
-  <label>URL gambar tanda tangan (opsional)</label><input id="pt" value="${esc(u.ttd)}" placeholder="https://..."><button class="btn" style="margin-top:16px" onclick="saveProfil(this)">Simpan profil</button></div>`;
+  <button class="btn" style="margin-top:16px" onclick="saveProfil(this)">Simpan profil</button></div>
+  <div class="card" style="max-width:560px;margin-top:14px"><h2>Tanda tangan</h2>
+  ${u.ttd ? `<img src="${u.ttd}" style="height:80px;background:#fff;border:1px dashed var(--line);padding:6px;border-radius:8px">` : '<p class="mut">Belum ada tanda tangan. Tanda tangani kertas putih, foto, lalu unggah. Latar putih dihapus otomatis.</p>'}
+  <label>Unggah gambar tanda tangan</label><input type="file" accept="image/*" onchange="upTtd(this)">
+  ${u.ttd ? '<button class="btn del sm" style="margin-top:10px" onclick="delTtd()">Hapus tanda tangan</button>' : ''}</div>`;
  },
  async jurnal() {
-  const j = await call('getJurnal', {nip:tgtNip()});
-  return `<h1>Jurnal Kegiatan</h1>${picker()}<div class="two"><div class="card"><h2>Tambah manual</h2><label>Tanggal</label><input type="date" id="jt" value="${today()}"><label>Uraian kegiatan</label><textarea id="ju" rows="3"></textarea>
+  const j = await call('getJurnal', {nip:tgtNip(), bulan:S.bulan}), kosong = j.filter(x => !x.nilai).length;
+  return `<h1>Jurnal Kegiatan</h1>${picker()}${monthPick()}<div class="two"><div class="card"><h2>Tambah manual</h2><label>Tanggal</label><input type="date" id="jt" value="${today()}"><label>Uraian kegiatan</label><textarea id="ju" rows="3"></textarea>
   <button class="btn" style="margin-top:12px" onclick="addJ(this)">Simpan kegiatan</button></div>
   <div class="card"><h2>Impor</h2><label>File .txt, .csv, .xls, .xlsx (kolom 1 tanggal, kolom 2 uraian)</label><input type="file" id="jf" accept=".txt,.csv,.xls,.xlsx" onchange="impFile(this)">
   <label>Impor teks (satu kegiatan per baris, format tanggal;uraian atau uraian saja)</label><textarea id="jx" rows="3"></textarea><button class="btn sec" style="margin-top:8px" onclick="impText(this)">Impor teks</button></div></div>
-  <div class="card tw" style="margin-top:14px"><h2>${j.length} catatan</h2><table><tr><th>Tanggal</th><th>Uraian</th><th></th></tr>
-  ${j.map(x => `<tr><td style="white-space:nowrap">${esc(x.tanggal)}</td><td>${esc(x.uraian)}</td><td><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=3 class="mut">Belum ada jurnal. Tambahkan kegiatan pertama di atas.</td></tr>'}</table></div>`;
+  <p class="mut">Setiap jurnal yang masuk otomatis dikelompokkan AI ke salah satu nilai BerAKHLAK. Pilihan bisa Anda ubah di tabel.</p>
+  <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>${j.length} catatan bulan ini</h2>${kosong ? `<button class="btn warn sm" onclick="classify(this)">✦ Kelompokkan ${kosong} jurnal dengan AI</button>` : ''}</div>
+  <table><tr><th>Tanggal</th><th>Uraian</th><th>Nilai BerAKHLAK</th><th></th></tr>
+  ${j.map(x => `<tr><td style="white-space:nowrap">${esc(x.tanggal)}</td><td>${esc(x.uraian)}</td><td><select style="min-width:170px" onchange="setJN('${x.id}',this.value)"><option value="">Belum dikelompokkan</option>${NILAI.map(n => `<option ${x.nilai === n ? 'selected' : ''}>${n}</option>`).join('')}</select></td><td><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=4 class="mut">Belum ada jurnal di bulan ini. Tambahkan kegiatan atau pilih bulan lain.</td></tr>'}</table></div>`;
  },
  async laporan() {
-  const d = S.skp = await call('getSkp', {nip:tgtNip()}); const n = NILAI[S.tab];
+  const d = S.skp = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}); const n = NILAI[S.tab];
   const ks = d.kegiatan.filter(k => k.nilai === n), nd = d.nilai.find(x => x.nilai === n);
-  return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row">${isAdmin() ? '<button class="btn warn" onclick="gen(this)">✦ Generate SKP</button>' : ''}<button class="btn" onclick="printSkp()">Cetak PDF</button></div></div>${picker()}
+  return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row"><button class="btn warn" onclick="gen(this)">✦ Generate SKP</button><button class="btn" onclick="printSkp(this)">Cetak PDF</button></div></div>${picker()}${monthPick()}
+  <p class="mut" style="margin:0">Jurnal bulan ini: ${d.jurnalBulan}. Generate SKP menyusun kegiatan, output, dan tujuan dari jurnal tersebut.</p>
   <div class="tabs">${NILAI.map((x, i) => `<button class="${i === S.tab ? 'on' : ''}" onclick="S.tab=${i};go('laporan')">${x}</button>`).join('')}</div>
   <div class="card"><h2>${n.toUpperCase()}</h2><label>Deskripsi nilai</label><textarea id="nd" rows="3">${esc(nd ? nd.deskripsi : DESC[n])}</textarea>
   <button class="btn sec sm" style="margin-top:8px" onclick="saveNilai(this)">Simpan deskripsi</button></div>
   <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>Kegiatan</h2><button class="btn sm" onclick="editK()">+ Tambah kegiatan</button></div>
   <table><tr><th>Kegiatan</th><th>Output</th><th>Tujuan</th><th>Foto</th><th></th></tr>
   ${ks.map(k => { const dk = d.dok.find(x => x.kegiatanId === k.id); return `<tr><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td>
-   <td>${dk ? `<img class="thumb" src="${img(dk.fileId)}">` : ''}<br><label class="btn sec sm" style="display:inline-block;margin:4px 0 0;font-weight:600">${dk ? 'Ganti' : 'Unggah'}<input type="file" accept="image/*" hidden onchange="upFoto(this,'${k.id}')"></label></td>
-   <td style="white-space:nowrap"><button class="btn sec sm" onclick="editK('${k.id}')">Edit</button> <button class="btn del sm" onclick="delK('${k.id}')">Hapus</button></td></tr>`; }).join('') || '<tr><td colspan=5 class="mut">Belum ada kegiatan untuk nilai ini. Tambah manual atau minta admin menjalankan Generate SKP.</td></tr>'}</table>
+   <td>${dk ? thumb(dk.fileId) : ''}<br><label class="btn sec sm" style="display:inline-block;margin:4px 0 0;font-weight:600">${dk ? 'Ganti' : 'Unggah'}<input type="file" accept="image/*" hidden onchange="upFoto(this,'${k.id}')"></label></td>
+   <td style="white-space:nowrap"><button class="btn sec sm" onclick="editK('${k.id}')">Edit</button> <button class="btn del sm" onclick="delK('${k.id}')">Hapus</button></td></tr>`; }).join('') || '<tr><td colspan=5 class="mut">Belum ada kegiatan untuk nilai ini di bulan ini. Tambah manual atau klik Generate SKP.</td></tr>'}</table>
   <p class="mut">Hasil AI bisa diedit. Periksa kembali sebelum dicetak.</p></div>`;
  },
  async pass() {
@@ -213,17 +227,45 @@ const VIEWS = {
   <button class="btn ${e.status === 'Aktif' ? 'del' : ''} sm" onclick="togE('${esc(e.nip)}')">${e.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button></td></tr>`).join('')}</table></div>`;
  },
  async setting() {
-  S.set = await call('getSettings'); const f = [['pemerintah','Baris 1 kop'],['dinas','Baris 2 kop'],['sekolah','Nama sekolah'],['alamat','Alamat'],['telepon','Telepon'],['kota','Kota tanda tangan'],['tanggal','Tanggal laporan (kosong = hari ini)'],['logo','URL logo']];
-  return `<h1>Pengaturan Laporan</h1><div class="card" style="max-width:600px">${f.map(x => `<label>${x[1]}</label><input data-k="${x[0]}" value="${esc(S.set[x[0]])}">`).join('')}
-  <button class="btn" style="margin-top:16px" onclick="saveSet(this)">Simpan pengaturan</button></div>`;
+  S.set = await call('getSettings'); const f = [['pemerintah','Baris 1 kop'],['dinas','Baris 2 kop'],['sekolah','Nama sekolah'],['alamat','Alamat'],['telepon','Telepon'],['kota','Kota tanda tangan']];
+  return `<h1>Pengaturan Laporan</h1><div class="card" style="max-width:600px"><h2>Logo kop</h2>
+  ${S.set.logo ? `<img src="${S.set.logo}" style="height:70px;display:block;margin-bottom:8px">` : '<p class="mut">Belum ada logo.</p>'}
+  <input type="file" accept="image/*" onchange="upLogo(this)">${S.set.logo ? '<button class="btn del sm" style="margin-top:8px" onclick="delLogo()">Hapus logo</button>' : ''}</div>
+  <div class="card" style="max-width:600px;margin-top:14px">${f.map(x => `<label>${x[1]}</label><input data-k="${x[0]}" value="${esc(S.set[x[0]])}">`).join('')}
+  <p class="mut">Tanggal laporan otomatis memakai tanggal terakhir pada bulan yang dipilih.</p>
+  <button class="btn" style="margin-top:8px" onclick="saveSet(this)">Simpan pengaturan</button></div>`;
  }
 };
 
 // ====== Aksi ======
 const val = id => $('#' + id).value.trim();
-async function saveProfil(b) { busy(b, 'Menyimpan...', async () => { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:val('pt')}; await call('saveProfile', o); Object.assign(S.user, o); toast('Profil berhasil disimpan.'); }); }
+const monthPick = () => `<div class="row" style="margin:8px 0"><span class="mut">Bulan:</span><input type="month" value="${S.bulan}" style="max-width:180px" onchange="S.bulan=this.value||S.bulan;go(S.view)"></div>`;
+function smallImg(file, mw, mh, clear) {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, mw / im.width, mh / im.height);
+      for (const z of [1, .8, .6, .45, .3, .2]) {
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.width * k * z)); c.height = Math.max(1, Math.round(im.height * k * z));
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height);
+        if (clear) { const g = x.getImageData(0, 0, c.width, c.height), q = g.data; for (let i = 0; i < q.length; i += 4) if (q[i] > 200 && q[i + 1] > 200 && q[i + 2] > 200) q[i + 3] = 0; x.putImageData(g, 0, 0); }
+        const u = c.toDataURL('image/png'); if (u.length < 45000) return res(u);
+      }
+      rej(new Error('Gambar terlalu rumit. Gunakan gambar yang lebih sederhana.'));
+    };
+    im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file);
+  });
+}
+async function saveProf() { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:S.user.ttd || ''}; await call('saveProfile', o); Object.assign(S.user, o); }
+async function saveProfil(b) { busy(b, 'Menyimpan...', async () => { await saveProf(); toast('Profil berhasil disimpan.'); }); }
+async function upTtd(inp) { const f = inp.files[0]; if (!f) return; try { S.user.ttd = await smallImg(f, 420, 170, true); await saveProf(); toast('Tanda tangan berhasil disimpan.'); go('profil'); } catch (e) { toast(e.message, 1); } }
+async function delTtd() { S.user.ttd = ''; try { await saveProf(); toast('Tanda tangan dihapus.'); go('profil'); } catch (e) { toast(e.message, 1); } }
+async function upLogo(inp) { const f = inp.files[0]; if (!f) return; try { const u = await smallImg(f, 220, 220, false); await call('saveSettings', {data:{logo:u}}); S.set.logo = u; toast('Logo kop disimpan.'); go('setting'); } catch (e) { toast(e.message, 1); } }
+async function delLogo() { try { await call('saveSettings', {data:{logo:''}}); S.set.logo = ''; toast('Logo dihapus.'); go('setting'); } catch (e) { toast(e.message, 1); } }
+async function classify(b) { busy(b, 'Mengelompokkan...', async () => { const n = await call('classify', {nip:tgtNip()}); toast(n + ' jurnal dikelompokkan.'); go('jurnal'); }); }
+async function setJN(id, nilai) { try { await call('setJurnalNilai', {id, nilai, nip:tgtNip()}); toast('Nilai jurnal diubah.'); } catch (e) { toast(e.message, 1); } }
 async function chPw(b) { if (val('p2') !== val('p3')) return toast('Konfirmasi password tidak sama', 1); busy(b, 'Menyimpan...', async () => { await call('changePw', {lama:val('p1'), baru:val('p2')}); toast('Password berhasil diganti.'); go('pass'); }); }
-async function addJ(b) { if (!val('ju')) return toast('Uraian wajib diisi', 1); busy(b, 'Menyimpan...', async () => { await call('addJurnal', {nip:tgtNip(), items:[{tanggal:val('jt'), uraian:val('ju')}]}); toast('Kegiatan disimpan.'); go('jurnal'); }); }
+async function addJ(b) { if (!val('ju')) return toast('Uraian wajib diisi', 1); sendItems([{tanggal:val('jt') || today(), uraian:val('ju')}]); }
 async function delJ(id) { if (!await confirmBox('Hapus catatan jurnal ini?')) return; try { await call('delJurnal', {id, nip:tgtNip()}); toast('Jurnal dihapus.'); go('jurnal'); } catch (e) { toast(e.message, 1); } }
 function nd(v) {
   let d; if (typeof v === 'number') d = new Date(Math.round((v - 25569) * 864e5));
@@ -236,8 +278,17 @@ function parseLines(txt) {
     return {tanggal:today(), uraian:l};
   });
 }
-async function sendItems(items) { if (!items.length) return toast('Tidak ada data yang terbaca', 1); await call('addJurnal', {nip:tgtNip(), items}); toast(items.length + ' kegiatan diimpor.'); go('jurnal'); }
-async function impText(b) { busy(b, 'Mengimpor...', () => sendItems(parseLines($('#jx').value))); }
+async function sendItems(items) {
+  if (!items.length) return toast('Tidak ada data yang terbaca', 1);
+  $('#main').innerHTML = '<div class="card"><div class="spin"></div>Menyimpan ' + items.length + ' kegiatan dan mengelompokkannya dengan AI. Mohon tunggu...</div>';
+  try {
+    const r = await call('addJurnal', {nip:tgtNip(), items});
+    S.bulan = items.map(x => x.tanggal).sort().pop().slice(0, 7);
+    toast(r.ai ? r.n + ' kegiatan disimpan dan dikelompokkan AI.' : r.n + ' kegiatan disimpan. Pengelompokan AI gagal: ' + r.err, !r.ai);
+  } catch (e) { toast(e.message, 1); }
+  go('jurnal');
+}
+async function impText(b) { sendItems(parseLines($('#jx').value)); }
 async function impFile(inp) {
   const f = inp.files[0]; if (!f) return;
   try {
@@ -255,7 +306,7 @@ function editK(id) {
   modal(`<h2>${id ? 'Edit' : 'Tambah'} kegiatan</h2><label>Kegiatan</label><textarea id="k1" rows="2">${esc(k.kegiatan)}</textarea><label>Output yang dihasilkan</label><input id="k2" value="${esc(k.output)}">
   <label>Tujuan</label><input id="k3" value="${esc(k.tujuan)}"><label>Deskripsi</label><textarea id="k4" rows="3">${esc(k.deskripsi)}</textarea>
   <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="ks">Simpan</button></div>`);
-  $('#ks').onclick = () => { if (!val('k1')) return toast('Kegiatan wajib diisi', 1); busy($('#ks'), 'Menyimpan...', async () => { await call('saveKegiatan', {id, nip:tgtNip(), nilai:NILAI[S.tab], kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}); closeM(); toast('Kegiatan disimpan.'); go('laporan'); }); };
+  $('#ks').onclick = () => { if (!val('k1')) return toast('Kegiatan wajib diisi', 1); busy($('#ks'), 'Menyimpan...', async () => { await call('saveKegiatan', {id, bulan:S.bulan, nip:tgtNip(), nilai:NILAI[S.tab], kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}); closeM(); toast('Kegiatan disimpan.'); go('laporan'); }); };
 }
 async function delK(id) { if (!await confirmBox('Hapus kegiatan ini beserta foto buktinya?')) return; try { await call('delKegiatan', {id, nip:tgtNip()}); toast('Kegiatan dihapus.'); go('laporan'); } catch (e) { toast(e.message, 1); } }
 function compress(file) {
@@ -266,9 +317,8 @@ async function upFoto(inp, kid) {
   try { await call('uploadFoto', {nip:tgtNip(), nilai:NILAI[S.tab], kegiatanId:kid, data:await compress(f)}); toast('Foto bukti berhasil diunggah.'); go('laporan'); } catch (e) { toast(e.message, 1); }
 }
 async function gen(b) {
-  const has = S.skp.kegiatan.length;
-  if (has && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP pegawai ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
-  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip()}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); go('laporan'); });
+  if (S.skp.kegiatan.length && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP bulan ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
+  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip(), bulan:S.bulan}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); go('laporan'); });
 }
 function editE(nip) {
   const e = S.emps.find(x => x.nip == nip) || {role:'Pegawai', status:'Aktif'};
@@ -281,26 +331,35 @@ function editE(nip) {
 }
 async function resetE(nip) { if (!await confirmBox('Reset password pegawai ini ke 123456?')) return; try { toast(await call('resetPw', {nip})); } catch (e) { toast(e.message, 1); } }
 async function togE(nip) { try { await call('toggleEmp', {nip}); toast('Status pegawai diubah.'); go('pegawai'); } catch (e) { toast(e.message, 1); } }
-async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; document.querySelectorAll('[data-k]').forEach(i => d[i.dataset.k] = i.value.trim()); await call('saveSettings', {data:d}); S.set = d; toast('Pengaturan disimpan.'); }); }
+async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; document.querySelectorAll('[data-k]').forEach(i => d[i.dataset.k] = i.value.trim()); await call('saveSettings', {data:d}); Object.assign(S.set, d); toast('Pengaturan disimpan.'); }); }
 
 // ====== Cetak PDF (A4) ======
-async function printSkp() {
-  try {
-    const d = await call('getSkp', {nip:tgtNip()}); const p = isAdmin() ? S.emps.find(e => e.nip == tgtNip()) : S.user, st = S.set;
-    const tgl = st.tanggal || new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-    const kop = `<div class="kop">${st.logo ? `<img src="${esc(st.logo)}">` : ''}<div>${esc(st.pemerintah)}<br>${esc(st.dinas)}<br><b style="font-size:14pt">${esc(st.sekolah)}</b><br><small>${esc(st.alamat)} Telp. ${esc(st.telepon)}</small></div></div>`;
-    const used = NILAI.filter(n => d.kegiatan.some(k => k.nilai === n)); if (!used.length) return toast('Belum ada kegiatan SKP untuk dicetak', 1);
+const wrap = h => `<table class="wrap"><thead><tr><td><div class="sp"></div></td></tr></thead><tbody><tr><td class="in">${h}</td></tr></tbody><tfoot><tr><td><div class="sp"></div></td></tr></tfoot></table>`;
+async function printSkp(b) {
+  busy(b, 'Menyiapkan...', async () => {
+    const d = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}), st = S.set = await call('getSettings'), p = d.emp;
+    const used = NILAI.filter(n => d.kegiatan.some(k => k.nilai === n));
+    if (!used.length) throw new Error('Belum ada kegiatan SKP bulan ini untuk dicetak');
+    const ids = d.dok.map(x => x.fileId), foto = {};
+    for (let i = 0; i < ids.length; i += 5) Object.assign(foto, await call('fotoData', {nip:tgtNip(), ids:ids.slice(i, i + 5)}));
+    const [y, m] = S.bulan.split('-').map(Number), tgl = new Date(y, m, 0).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+    const kop = `<div class="kop">${st.logo ? `<img src="${st.logo}">` : ''}<div>${esc(st.pemerintah)}<br>${esc(st.dinas)}<br><b style="font-size:14pt">${esc(st.sekolah)}</b><br><small>${esc(st.alamat)} Telp. ${esc(st.telepon)}</small></div></div>`;
+    const ttd = `<div class="ttd">${esc(st.kota)}, ${tgl}<br>${esc(p.jabatan)}<br>${p.ttd ? `<img src="${p.ttd}"><br>` : '<br><br><br>'}<b><u>${esc(p.nama)}</u></b><br>NIP. ${esc(p.nip)}</div>`;
     let h = '';
     used.forEach((n, i) => {
       const ks = d.kegiatan.filter(k => k.nilai === n), nl = d.nilai.find(x => x.nilai === n);
-      h += `<div class="pg">${kop}<h3 style="text-align:center">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(nl ? nl.deskripsi : DESC[n])}</p>
-      <table><tr><th>No.</th><th>Kegiatan</th><th>Output yang dihasilkan</th><th>Tujuan</th></tr>${ks.map((k, j) => `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td></tr>`).join('')}</table>
-      <h4 style="text-align:center;margin-top:18px">DOKUMENTASI KEGIATAN</h4><table><tr><th>No.</th><th>Kegiatan</th><th>Dokumentasi</th></tr>
-      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id); return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${x ? `<img class="d" src="${img(x.fileId)}">` : ''}</td></tr>`; }).join('')}</table>
-      ${i === used.length - 1 ? `<div class="ttd">${esc(st.kota)}, ${esc(tgl)}<br>${esc(p.jabatan)}<br>${p.ttd ? `<img src="${esc(p.ttd)}"><br>` : '<br><br><br>'}<b><u>${esc(p.nama)}</u></b><br>NIP. ${esc(p.nip)}</div>` : ''}</div>`;
+      h += wrap(`${kop}<h3 style="text-align:center;margin:0 0 8px">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(nl ? nl.deskripsi : DESC[n])}</p>
+      <table class="tb"><tr><th style="width:7%">No.</th><th>Kegiatan</th><th>Output yang dihasilkan</th><th>Tujuan</th></tr>${ks.map((k, j) => `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td></tr>`).join('')}</table>
+      <h4 style="text-align:center;margin:18px 0 8px">DOKUMENTASI KEGIATAN</h4><table class="tb"><tr><th style="width:7%">No.</th><th style="width:38%">Kegiatan</th><th>Dokumentasi</th></tr>
+      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id), f = x && foto[x.fileId]; return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${f ? `<img class="d" src="${f}">` : ''}</td></tr>`; }).join('')}</table>
+      ${i === used.length - 1 ? ttd : ''}`);
     });
-    $('#print').innerHTML = h; setTimeout(() => print(), 700);
-  } catch (e) { toast(e.message, 1); }
+    $('#print').innerHTML = h;
+    await Promise.all([...document.querySelectorAll('#print img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; setTimeout(r, 6000); })));
+    const old = document.title; document.title = 'SKP ' + p.nama + ' ' + S.bulan;
+    window.onafterprint = () => { document.title = old; $('#print').innerHTML = ''; };
+    print();
+  });
 }
 
 // ====== Mulai ======
