@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e5a4f">
+<meta name="mobile-web-app-capable" content="yes">
 <title>SKANDA - Sistem SKP SMKN Dander</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -60,7 +62,7 @@ th{font-size:12px;color:var(--mut)}
 .spin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--pine);animation:sp .8s linear infinite;margin-bottom:10px}
 .thumb{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
 #print{display:none}
-@media(max-width:860px){
+@media(max-width:700px){
  .login{grid-template-columns:1fr}.hero{padding:28px;min-height:200px}
  .shell{grid-template-columns:1fr}.top{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;padding:10px 14px;position:sticky;top:0;z-index:30}
  aside{position:fixed;left:0;top:0;z-index:40;width:260px;transform:translateX(-100%);transition:transform .25s}aside.open{transform:none}
@@ -81,6 +83,26 @@ th{font-size:12px;color:var(--mut)}
  table.rt td[data-label=""]{justify-content:flex-end;flex-wrap:wrap}table.rt td[data-label=""]::before{display:none}
  table.rt td select{min-width:0!important;width:100%}
 }
+#bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--amber);z-index:100;opacity:0;pointer-events:none}
+#bar.on{opacity:1;animation:bar 1.1s ease-in-out infinite}
+@keyframes bar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.sh,#bn{display:none}aside a i,#bn a i{font-style:normal}
+aside .brand{display:flex;align-items:center;gap:10px}aside .brand img,.top img{width:34px;height:34px;object-fit:contain}
+.who .wn{margin-bottom:6px}#main{max-width:1240px;margin-inline:auto;width:100%}
+@media(pointer:coarse){.btn{min-height:42px}.btn.sm{min-height:38px}aside a{padding:12px}input,select,textarea{min-height:44px}}
+@media(min-width:701px) and (max-width:1099px){
+ .shell{grid-template-columns:82px 1fr}
+ aside{padding:12px 6px}aside .brand{justify-content:center;padding:6px 0 12px}
+ aside a{flex-direction:column;gap:2px;font-size:10.5px;padding:9px 2px;text-align:center;justify-content:center}
+ aside a i{font-size:20px}.lb{display:none}.sh{display:block}.who .wn{display:none}main{padding:20px}
+}
+@media(max-width:700px){
+ .top{padding-top:calc(10px + env(safe-area-inset-top))}.top img{width:30px;height:30px}
+ #bn{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+ #bn a{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 2px;font-size:10.5px;color:var(--mut);cursor:pointer}
+ #bn a i{font-size:20px}#bn a.on{color:var(--pine);font-weight:700}
+ main{padding-bottom:calc(84px + env(safe-area-inset-bottom))}#toast{bottom:calc(76px + env(safe-area-inset-bottom))}
+}
 @media print{
  @page{size:A4;margin:0}
  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}body>*:not(#print){display:none!important}
@@ -95,6 +117,7 @@ th{font-size:12px;color:var(--mut)}
 </style>
 </head>
 <body>
+<div id="bar"></div>
 <div id="boot"><div class="ring"></div></div>
 <div id="app"></div><div id="ov" onclick="menu(0)"></div><div id="modal"></div><div id="toast"></div><div id="print"></div>
 <script>
@@ -112,8 +135,8 @@ const DESC = {
  'Loyal':'Nilai Loyal bagi Tenaga Kependidikan di bagian Kepegawaian SMK sangat berkaitan dengan integritas, dedikasi, dan kepatuhan terhadap rahasia negara serta nama baik instansi. Mengingat bagian kepegawaian memegang data sensitif guru dan staf, loyalitas di sini diuji melalui cara Anda menjaga kepercayaan tersebut.',
  'Adaptif':'Seorang operator layanan operasional pada bagian Buku Induk Siswa dituntut mampu beradaptasi dengan perubahan regulasi administrasi pendidikan, sistem digitalisasi data, serta kebutuhan layanan informasi peserta didik. Adaptif berarti mampu menyesuaikan prosedur kerja dengan perkembangan sistem pendataan (baik manual maupun berbasis aplikasi), serta memastikan akurasi dan keamanan data siswa.',
  'Kolaboratif':'Nilai Kolaboratif bagi Tenaga Kependidikan (Tendik) bagian Kepegawaian di SMK sangat penting karena urusan data pegawai tidak bisa dikerjakan sendirian. Anda harus bekerja sama dengan operator Dapodik, Bendahara, Pengelola Sekolah, Dinas Pendidikan, hingga mitra industri (untuk guru tamu).'};
-const NAV_EMP = [['dash','Dashboard'],['profil','Profil Saya'],['jurnal','Jurnal Kegiatan'],['laporan','Laporan SKP'],['pass','Ganti Password']];
-const NAV_ADMIN = [['pegawai','Master Pegawai'],['setting','Pengaturan Laporan']];
+const NAV_EMP = [['dash','Dashboard','📊','Beranda'],['profil','Profil Saya','👤','Profil'],['jurnal','Jurnal Kegiatan','📓','Jurnal'],['laporan','Laporan SKP','📝','Laporan'],['pass','Ganti Password','🔑','Sandi']];
+const NAV_ADMIN = [['pegawai','Master Pegawai','👥','Pegawai'],['setting','Pengaturan Laporan','⚙️','Atur']];
 const loc = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString();
 const S = {token:localStorage.skToken||'', user:null, view:'dash', tgt:'', tab:0, emps:[], set:{}, bulan:loc().slice(0,7)};
 const $ = s => document.querySelector(s);
@@ -122,13 +145,58 @@ const img = id => String(id).startsWith('data:') ? id : 'https://drive.google.co
 const thumb = id => String(id).startsWith('data:') ? `<img class="thumb" src="${id}">` : `<img class="thumb" src="${img(id)}" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/${id}=w300'">`;
 const today = () => loc().slice(0,10);
 
+let pend = 0, W = 0;
+const C = {}, T = {}, P = {};
+const ck = (a, d) => a + '|' + JSON.stringify(d), lsk = k => 'sk:d:' + k;
+function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : undefined; } catch (e) { return undefined; } }
+function lsSet(k, v) { try { const j = JSON.stringify(v); if (j.length < 600000) localStorage.setItem(k, j); } catch (e) {} }
 async function call(action, data = {}) {
   if (API_URL.startsWith('PASTE')) throw new Error('API_URL belum diisi di skanda.html');
-  const r = await fetch(API_URL, {method:'POST', body:JSON.stringify({action, token:S.token, ...data})});
-  const j = await r.json();
-  if (!j.ok) { if (/Sesi berakhir/.test(j.error)) logout(true); throw new Error(j.error); }
-  return j.data;
+  pend++; $('#bar').classList.add('on');
+  try {
+    const r = await fetch(API_URL, {method:'POST', body:JSON.stringify({action, token:S.token, ...data})});
+    const j = await r.json();
+    if (!j.ok) { if (/Sesi berakhir/.test(j.error)) logout(true); throw new Error(j.error); }
+    return j.data;
+  } finally { if (!--pend) $('#bar').classList.remove('on'); }
 }
+/** Baca data: tampilkan cache seketika, segarkan di latar belakang. */
+async function get(action, data = {}, onFresh) {
+  const k = ck(action, data), v0 = S.view, fresh = Date.now() - (T[k] || 0) < 15000;
+  if (C[k] === undefined) C[k] = lsGet(lsk(k));
+  const cb = onFresh || (() => { if (S.view === v0) softRefresh(); });
+  const net = () => {
+    const w0 = W;
+    return (P[k] = P[k] || call(action, data).finally(() => delete P[k])).then(v => {
+      if (w0 !== W) return C[k];
+      const ch = JSON.stringify(v) !== JSON.stringify(C[k]);
+      C[k] = v; T[k] = Date.now(); lsSet(lsk(k), v); if (ch) cb(v); return v;
+    });
+  };
+  if (C[k] !== undefined) { if (!fresh) net().catch(() => {}); return C[k]; }
+  return net();
+}
+function setCache(a, d, fn) {
+  const k = ck(a, d); if (C[k] === undefined) C[k] = lsGet(lsk(k));
+  C[k] = fn(C[k] === undefined ? undefined : JSON.parse(JSON.stringify(C[k]))); T[k] = Date.now(); W++; lsSet(lsk(k), C[k]);
+}
+function stale(...as) { Object.keys(T).forEach(k => { if (!as.length || as.some(a => k.startsWith(a + '|'))) delete T[k]; }); }
+function bust(...as) {
+  W++; const m = k => as.some(a => k.startsWith(a + '|'));
+  Object.keys(C).filter(m).forEach(k => { delete C[k]; delete T[k]; });
+  try { Object.keys(localStorage).filter(x => x.startsWith('sk:d:') && m(x.slice(5))).forEach(x => localStorage.removeItem(x)); } catch (e) {}
+}
+function editing() { const a = document.activeElement; return $('#modal.on') || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); }
+function softRefresh(n = 8) {
+  if (!S.user) return;
+  if (editing()) { if (n > 0) setTimeout(() => softRefresh(n - 1), 4000); return; }
+  go(S.view, 1);
+}
+function prefetch() {
+  const n = tgtNip(), [y, m] = S.bulan.split('-').map(Number), pv = new Date(y, m - 2, 1), pb = pv.getFullYear() + '-' + String(pv.getMonth() + 1).padStart(2, '0'), nop = () => {};
+  [['getSkp', {nip:n}], ['getSkp', {nip:n, bulan:S.bulan}], ['getJurnal', {nip:n, bulan:S.bulan}], ['getSkp', {nip:n, bulan:pb}], ['getJurnal', {nip:n, bulan:pb}]].forEach(([a, d]) => get(a, d, nop).catch(() => {}));
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.user) { stale(); softRefresh(); } });
 function toast(m, err) { const d = document.createElement('div'); d.className = 't' + (err ? ' e' : ''); d.textContent = (err ? '❌ ' : '✅ ') + m; $('#toast').append(d); setTimeout(() => d.remove(), 3800); }
 async function busy(btn, label, fn) {
   const t = btn.textContent; btn.disabled = true; btn.textContent = label;
@@ -155,40 +223,45 @@ function loginView() {
   <button class="btn" style="width:100%;margin-top:18px" id="lb">Masuk</button></form></div></div>`;
   $('#lf').onsubmit = e => { e.preventDefault(); busy($('#lb'), 'Memeriksa...', async () => {
     const d = await call('login', {nip:$('#nip').value, password:$('#pw').value});
-    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; S.view = 'dash'; await boot2();
+    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; lsSet('sk:user', d.user); S.view = 'dash'; await boot2();
   }); };
 }
-function logout(silent) { localStorage.removeItem('skToken'); S.token = ''; S.user = null; S.tgt = ''; loginView(); if (!silent) toast('Anda sudah keluar'); }
+function logout(silent) {
+  try { Object.keys(localStorage).filter(k => k.startsWith('sk:')).forEach(k => localStorage.removeItem(k)); localStorage.removeItem('skToken'); } catch (e) {}
+  Object.keys(C).forEach(k => delete C[k]); Object.keys(T).forEach(k => delete T[k]);
+  S.token = ''; S.user = null; S.tgt = ''; S.set = {}; S.emps = []; closeM(); loginView(); if (!silent) toast('Anda sudah keluar');
+}
 async function boot2() {
-  S.set = await call('getSettings');
-  if (isAdmin()) S.emps = await call('listEmp');
-  shell();
+  const [st, em] = await Promise.all([get('getSettings', {}, v => { S.set = v; }), isAdmin() ? get('listEmp', {}, v => { S.emps = v; }) : []]);
+  S.set = st; S.emps = em; shell(); prefetch();
 }
 function shell() {
-  const nav = NAV_EMP.concat(isAdmin() ? NAV_ADMIN : []);
-  $('#app').innerHTML = `<div class="top"><button class="btn sec sm" onclick="menu(1)">☰</button><b>SKANDA</b></div><div class="shell"><aside>
-  <div class="brand">SKANDA<small>SKP SMKN Dander</small></div>
-  ${nav.map(n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')">${n[1]}</a>`).join('')}
-  <div class="who"><b>${esc(S.user.nama)}</b><br>${esc(S.user.role)}<br><a onclick="logout()" style="padding:6px 0;color:var(--amber)">Keluar</a></div></aside><main id="main"></main></div>`;
+  const nav = NAV_EMP.concat(isAdmin() ? NAV_ADMIN : []), bn = ['dash', 'jurnal', 'laporan', 'profil'].map(id => nav.find(n => n[0] === id));
+  const link = n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')" title="${n[1]}"><i>${n[2]}</i><span class="lb">${n[1]}</span><span class="sh">${n[3]}</span></a>`;
+  $('#app').innerHTML = `<div class="top"><button class="btn sec sm" onclick="menu(1)" aria-label="Menu">☰</button><img src="${LOGO}" alt=""><b>SKANDA</b></div><div class="shell"><aside>
+  <div class="brand"><img src="${LOGO}" alt=""><span class="lb">SKANDA<small>SKP SMKN Dander</small></span></div>${nav.map(link).join('')}
+  <div class="who"><div class="wn"><b>${esc(S.user.nama)}</b><br>${esc(S.user.role)}</div><a onclick="logout()" title="Keluar"><i>⏻</i><span class="lb">Keluar</span><span class="sh">Keluar</span></a></div></aside><main id="main"></main></div>
+  <nav id="bn">${bn.map(n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')"><i>${n[2]}</i><span>${n[3]}</span></a>`).join('')}<a onclick="menu(1)"><i>☰</i><span>Menu</span></a></nav>`;
   go(S.view);
 }
-async function go(v) {
+async function go(v, silent) {
   S.view = v; menu(0);
-  document.querySelectorAll('aside a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === v));
-  $('#main').innerHTML = skel();
-  try { $('#main').innerHTML = await VIEWS[v](); } catch (e) { $('#main').innerHTML = '<div class="card">Gagal memuat: ' + esc(e.message) + '</div>'; }
-  scrollTo(0, 0);
+  document.querySelectorAll('[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === v));
+  if (!silent) $('#main').innerHTML = skel();
+  try { const h = await VIEWS[v](); if (S.view === v) $('#main').innerHTML = h; }
+  catch (e) { if (!silent || !$('#main').innerHTML) $('#main').innerHTML = '<div class="card">Gagal memuat: ' + esc(e.message) + '</div>'; }
+  if (!silent) scrollTo(0, 0);
 }
 function picker() {
   if (!isAdmin()) return '';
-  return `<div class="row" style="margin:8px 0"><span class="mut">Pegawai:</span><select style="max-width:300px" onchange="S.tgt=this.value;go(S.view)">
+  return `<div class="row" style="margin:8px 0"><span class="mut">Pegawai:</span><select style="max-width:300px" onchange="S.tgt=this.value;go(S.view);prefetch()">
   ${S.emps.map(e => `<option value="${esc(e.nip)}" ${tgtNip() == e.nip ? 'selected' : ''}>${esc(e.nama)} (${esc(e.nip)})</option>`).join('')}</select></div>`;
 }
 
 // ====== Views ======
 const VIEWS = {
  async dash() {
-  const d = await call('getSkp', {nip:tgtNip()});
+  const d = await get('getSkp', {nip:tgtNip()});
   const cnt = NILAI.map(n => d.kegiatan.filter(k => k.nilai === n).length), max = Math.max(1, ...cnt);
   const withDok = d.kegiatan.filter(k => d.dok.some(x => x.kegiatanId === k.id)).length, tot = d.kegiatan.length;
   return `<h1>Dashboard</h1>${picker()}<div class="grid4">
@@ -209,18 +282,18 @@ const VIEWS = {
   ${u.ttd ? '<button class="btn del sm" style="margin-top:10px" onclick="delTtd()">Hapus tanda tangan</button>' : ''}</div>`;
  },
  async jurnal() {
-  const j = await call('getJurnal', {nip:tgtNip(), bulan:S.bulan}), kosong = j.filter(x => !x.nilai).length;
+  const j = await get('getJurnal', {nip:tgtNip(), bulan:S.bulan}), kosong = j.filter(x => !x.nilai).length;
   return `<h1>Jurnal Kegiatan</h1>${picker()}${monthPick()}<div class="two"><div class="card"><h2>Tambah manual</h2><label>Tanggal</label><input type="date" id="jt" value="${today()}"><label>Uraian kegiatan</label><textarea id="ju" rows="3"></textarea>
   <button class="btn" style="margin-top:12px" onclick="addJ(this)">Simpan kegiatan</button></div>
   <div class="card"><h2>Impor</h2><label>File .txt, .csv, .xls, .xlsx (kolom 1 tanggal, kolom 2 uraian)</label><input type="file" id="jf" accept=".txt,.csv,.xls,.xlsx" onchange="impFile(this)">
   <label>Impor teks (satu kegiatan per baris, format tanggal;uraian atau uraian saja)</label><textarea id="jx" rows="3"></textarea><button class="btn sec" style="margin-top:8px" onclick="impText(this)">Impor teks</button></div></div>
-  <p class="mut">Setiap jurnal yang masuk otomatis dikelompokkan AI ke salah satu nilai BerAKHLAK. Pilihan bisa Anda ubah di tabel.</p>
+  <p class="mut">Setiap jurnal yang masuk otomatis dikelompokkan AI ke salah satu nilai BerAKHLAK. Pilihan bisa Anda ubah di tabel.</p>${S.ai ? '<p><b>⏳ AI sedang mengelompokkan jurnal baru. Anda boleh lanjut bekerja.</b></p>' : ''}
   <div class="card tw" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2>${j.length} catatan bulan ini</h2>${kosong ? `<button class="btn warn sm" onclick="classify(this)">✦ Kelompokkan ${kosong} jurnal dengan AI</button>` : ''}</div>
   <table class="rt"><tr><th>Tanggal</th><th>Uraian</th><th>Nilai BerAKHLAK</th><th></th></tr>
-  ${j.map(x => `<tr><td data-label="Tanggal" style="white-space:nowrap">${esc(x.tanggal)}</td><td data-label="Uraian">${esc(x.uraian)}</td><td data-label="Nilai"><select style="min-width:170px" onchange="setJN('${x.id}',this.value)"><option value="">Belum dikelompokkan</option>${NILAI.map(n => `<option ${x.nilai === n ? 'selected' : ''}>${n}</option>`).join('')}</select></td><td data-label=""><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=4 class="mut">Belum ada jurnal di bulan ini. Tambahkan kegiatan atau pilih bulan lain.</td></tr>'}</table></div>`;
+  ${j.map(x => `<tr><td data-label="Tanggal" style="white-space:nowrap">${esc(x.tanggal)}</td><td data-label="Uraian">${esc(x.uraian)}</td><td data-label="Nilai"><select style="min-width:170px" onchange="setJN('${x.id}',this.value)" ${x.id.startsWith('tmp') ? 'disabled' : ''}><option value="">Belum dikelompokkan</option>${NILAI.map(n => `<option ${x.nilai === n ? 'selected' : ''}>${n}</option>`).join('')}</select></td><td data-label=""><button class="btn del sm" onclick="delJ('${x.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan=4 class="mut">Belum ada jurnal di bulan ini. Tambahkan kegiatan atau pilih bulan lain.</td></tr>'}</table></div>`;
  },
  async laporan() {
-  const d = S.skp = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}); const n = NILAI[S.tab];
+  const d = S.skp = await get('getSkp', {nip:tgtNip(), bulan:S.bulan}); const n = NILAI[S.tab];
   const ks = d.kegiatan.filter(k => k.nilai === n), nd = d.nilai.find(x => x.nilai === n);
   return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row"><button class="btn warn" onclick="gen(this)">✦ Generate SKP</button><button class="btn" onclick="printSkp(this)">Cetak PDF</button></div></div>${picker()}${monthPick()}
   <p class="mut" style="margin:0">Jurnal bulan ini: ${d.jurnalBulan}. Generate SKP menyusun kegiatan, output, dan tujuan dari jurnal. Cetak PDF hanya mencetak tab yang sedang dipilih (${n}).</p>
@@ -238,7 +311,7 @@ const VIEWS = {
   <label>Ulangi password baru</label><input type="password" id="p3"><button class="btn" style="margin-top:16px" onclick="chPw(this)">Ganti password</button></div>`;
  },
  async pegawai() {
-  S.emps = await call('listEmp');
+  S.emps = await get('listEmp');
   return `<div class="row" style="justify-content:space-between"><h1>Master Pegawai</h1><button class="btn" onclick="editE()">+ Tambah pegawai</button></div>
   <div class="card tw"><table class="rt"><tr><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Unit</th><th>Role</th><th>Status</th><th></th></tr>
   ${S.emps.map(e => `<tr><td data-label="NIP">${esc(e.nip)}</td><td data-label="Nama">${esc(e.nama)}</td><td data-label="Jabatan">${esc(e.jabatan)}</td><td data-label="Unit">${esc(e.unit)}</td><td data-label="Role">${esc(e.role)}</td>
@@ -247,7 +320,7 @@ const VIEWS = {
   <button class="btn ${e.status === 'Aktif' ? 'del' : ''} sm" onclick="togE('${esc(e.nip)}')">${e.status === 'Aktif' ? 'Nonaktifkan' : 'Aktifkan'}</button></td></tr>`).join('')}</table></div>`;
  },
  async setting() {
-  S.set = await call('getSettings'); const f = [['pemerintah','Baris 1 kop'],['dinas','Baris 2 kop'],['sekolah','Nama sekolah'],['alamat','Alamat'],['telepon','Telepon'],['kota','Kota tanda tangan']];
+  S.set = await get('getSettings'); const f = [['pemerintah','Baris 1 kop'],['dinas','Baris 2 kop'],['sekolah','Nama sekolah'],['alamat','Alamat'],['telepon','Telepon'],['kota','Kota tanda tangan']];
   return `<h1>Pengaturan Laporan</h1><div class="card" style="max-width:600px"><h2>Logo kop</h2>
   ${S.set.logo ? `<img src="${S.set.logo}" style="height:70px;display:block;margin-bottom:8px">` : '<p class="mut">Belum ada logo.</p>'}
   <input type="file" accept="image/*" onchange="upLogo(this)">${S.set.logo ? '<button class="btn del sm" style="margin-top:8px" onclick="delLogo()">Hapus logo</button>' : ''}</div>
@@ -259,7 +332,7 @@ const VIEWS = {
 
 // ====== Aksi ======
 const val = id => $('#' + id).value.trim();
-const monthPick = () => `<div class="row" style="margin:8px 0"><span class="mut">Bulan:</span><input type="month" value="${S.bulan}" style="max-width:180px" onchange="S.bulan=this.value||S.bulan;go(S.view)"></div>`;
+const monthPick = () => `<div class="row" style="margin:8px 0"><span class="mut">Bulan:</span><input type="month" value="${S.bulan}" style="max-width:180px" onchange="S.bulan=this.value||S.bulan;go(S.view);prefetch()"></div>`;
 function smallImg(file, mw, mh, clear) {
   return new Promise((res, rej) => {
     const im = new Image();
@@ -276,17 +349,26 @@ function smallImg(file, mw, mh, clear) {
     im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file);
   });
 }
-async function saveProf() { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:S.user.ttd || ''}; await call('saveProfile', o); Object.assign(S.user, o); }
+async function saveProf() { const o = {nama:val('pn'), jabatan:val('pj'), unit:val('pu'), ttd:S.user.ttd || ''}; await call('saveProfile', o); Object.assign(S.user, o); lsSet('sk:user', S.user); }
 async function saveProfil(b) { busy(b, 'Menyimpan...', async () => { await saveProf(); toast('Profil berhasil disimpan.'); }); }
-async function upTtd(inp) { const f = inp.files[0]; if (!f) return; try { S.user.ttd = await smallImg(f, 560, 220, true); await saveProf(); toast('Tanda tangan berhasil disimpan.'); go('profil'); } catch (e) { toast(e.message, 1); } }
-async function delTtd() { S.user.ttd = ''; try { await saveProf(); toast('Tanda tangan dihapus.'); go('profil'); } catch (e) { toast(e.message, 1); } }
-async function upLogo(inp) { const f = inp.files[0]; if (!f) return; try { const u = await smallImg(f, 220, 220, false); await call('saveSettings', {data:{logo:u}}); S.set.logo = u; toast('Logo kop disimpan.'); go('setting'); } catch (e) { toast(e.message, 1); } }
-async function delLogo() { try { await call('saveSettings', {data:{logo:''}}); S.set.logo = ''; toast('Logo dihapus.'); go('setting'); } catch (e) { toast(e.message, 1); } }
-async function classify(b) { busy(b, 'Mengelompokkan...', async () => { const n = await call('classify', {nip:tgtNip()}); toast(n + ' jurnal dikelompokkan.'); go('jurnal'); }); }
-async function setJN(id, nilai) { try { await call('setJurnalNilai', {id, nilai, nip:tgtNip()}); toast('Nilai jurnal diubah.'); } catch (e) { toast(e.message, 1); } }
+async function upTtd(inp) { const f = inp.files[0]; if (!f) return; try { S.user.ttd = await smallImg(f, 560, 220, true); const p = saveProf(); go('profil', 1); await p; toast('Tanda tangan berhasil disimpan.'); } catch (e) { toast(e.message, 1); } }
+async function delTtd() { S.user.ttd = ''; try { const p = saveProf(); go('profil', 1); await p; toast('Tanda tangan dihapus.'); } catch (e) { toast(e.message, 1); } }
+async function upLogo(inp) { const f = inp.files[0]; if (!f) return; try { const u = await smallImg(f, 220, 220, false); S.set.logo = u; setCache('getSettings', {}, x => ({...(x || {}), logo:u})); go('setting', 1); await call('saveSettings', {data:{logo:u}}); toast('Logo kop disimpan.'); } catch (e) { toast(e.message, 1); bust('getSettings'); } }
+async function delLogo() { try { S.set.logo = ''; setCache('getSettings', {}, x => ({...(x || {}), logo:''})); go('setting', 1); await call('saveSettings', {data:{logo:''}}); toast('Logo dihapus.'); } catch (e) { toast(e.message, 1); bust('getSettings'); } }
+async function classify(b) { busy(b, 'Mengelompokkan...', async () => { const n = await call('classify', {nip:tgtNip()}); toast(n + ' jurnal dikelompokkan.'); bust('getJurnal', 'getSkp'); await go('jurnal', 1); }); }
+async function setJN(id, nilai) {
+  if (id.startsWith('tmp')) return toast('Tunggu sebentar, data sedang disimpan', 1);
+  setCache('getJurnal', {nip:tgtNip(), bulan:S.bulan}, a => (a || []).map(x => x.id === id ? {...x, nilai} : x));
+  try { await call('setJurnalNilai', {id, nilai, nip:tgtNip()}); toast('Nilai jurnal diubah.'); stale('getSkp'); } catch (e) { toast(e.message, 1); bust('getJurnal'); softRefresh(); }
+}
 async function chPw(b) { if (val('p2') !== val('p3')) return toast('Konfirmasi password tidak sama', 1); busy(b, 'Menyimpan...', async () => { await call('changePw', {lama:val('p1'), baru:val('p2')}); toast('Password berhasil diganti.'); go('pass'); }); }
 async function addJ(b) { if (!val('ju')) return toast('Uraian wajib diisi', 1); sendItems([{tanggal:val('jt') || today(), uraian:val('ju')}]); }
-async function delJ(id) { if (!await confirmBox('Hapus catatan jurnal ini?')) return; try { await call('delJurnal', {id, nip:tgtNip()}); toast('Jurnal dihapus.'); go('jurnal'); } catch (e) { toast(e.message, 1); } }
+async function delJ(id) {
+  if (id.startsWith('tmp')) return toast('Tunggu sebentar, data sedang disimpan', 1);
+  if (!await confirmBox('Hapus catatan jurnal ini?')) return;
+  setCache('getJurnal', {nip:tgtNip(), bulan:S.bulan}, a => (a || []).filter(x => x.id !== id)); go('jurnal', 1);
+  call('delJurnal', {id, nip:tgtNip()}).then(() => { toast('Jurnal dihapus.'); stale('getSkp'); }).catch(e => { toast(e.message, 1); bust('getJurnal'); softRefresh(); });
+}
 function nd(v) {
   let d; if (typeof v === 'number') d = new Date(Math.round((v - 25569) * 864e5));
   else { const m = String(v).trim().match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/); d = m ? new Date(Date.UTC(+m[3], m[2] - 1, +m[1])) : new Date(v); }
@@ -300,13 +382,13 @@ function parseLines(txt) {
 }
 async function sendItems(items) {
   if (!items.length) return toast('Tidak ada data yang terbaca', 1);
-  $('#main').innerHTML = '<div class="card"><div class="spin"></div>Menyimpan ' + items.length + ' kegiatan dan mengelompokkannya dengan AI. Mohon tunggu...</div>';
-  try {
-    const r = await call('addJurnal', {nip:tgtNip(), items});
-    S.bulan = items.map(x => x.tanggal).sort().pop().slice(0, 7);
-    toast(r.ai ? r.n + ' kegiatan disimpan dan dikelompokkan AI.' : r.n + ' kegiatan disimpan. Pengelompokan AI gagal: ' + r.err, !r.ai);
-  } catch (e) { toast(e.message, 1); }
-  go('jurnal');
+  const nip = tgtNip(), bulan = items.map(x => x.tanggal).sort().pop().slice(0, 7);
+  S.bulan = bulan;
+  try { await get('getJurnal', {nip, bulan}, () => {}); } catch (e) { return toast(e.message, 1); }
+  setCache('getJurnal', {nip, bulan}, a => (a || []).concat(items.map(x => ({id:'tmp' + Math.random().toString(36).slice(2, 8), nip, tanggal:x.tanggal, uraian:x.uraian, nilai:''}))).sort((p, q) => p.tanggal < q.tanggal ? 1 : -1));
+  S.ai = (S.ai || 0) + 1; go('jurnal', 1);
+  call('addJurnal', {nip, items}).then(r => toast(r.ai ? r.n + ' kegiatan disimpan dan dikelompokkan AI.' : r.n + ' kegiatan disimpan. Pengelompokan AI gagal: ' + r.err, !r.ai))
+    .catch(e => toast(e.message, 1)).finally(() => { S.ai--; bust('getJurnal'); stale('getSkp'); softRefresh(); });
 }
 async function impText(b) { sendItems(parseLines($('#jx').value)); }
 async function impFile(inp) {
@@ -322,29 +404,52 @@ async function impFile(inp) {
 }
 async function saveNilai(b) { busy(b, 'Menyimpan...', async () => { await call('saveNilai', {nip:tgtNip(), nilai:NILAI[S.tab], deskripsi:val('nd')}); toast('Deskripsi disimpan.'); }); }
 function editK(id) {
+  if (id && id.startsWith('tmp')) return toast('Tunggu sebentar, kegiatan sedang disimpan', 1);
   const k = (S.skp.kegiatan.find(x => x.id === id)) || {};
   modal(`<h2>${id ? 'Edit' : 'Tambah'} kegiatan</h2><label>Kegiatan</label><textarea id="k1" rows="2">${esc(k.kegiatan)}</textarea><label>Output yang dihasilkan</label><input id="k2" value="${esc(k.output)}">
   <label>Tujuan</label><input id="k3" value="${esc(k.tujuan)}"><label>Deskripsi</label><textarea id="k4" rows="3">${esc(k.deskripsi)}</textarea>
   <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="ks">Simpan</button></div>`);
-  $('#ks').onclick = () => { if (!val('k1')) return toast('Kegiatan wajib diisi', 1); busy($('#ks'), 'Menyimpan...', async () => { await call('saveKegiatan', {id, bulan:S.bulan, nip:tgtNip(), nilai:NILAI[S.tab], kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}); closeM(); toast('Kegiatan disimpan.'); go('laporan'); }); };
+  $('#ks').onclick = () => {
+    if (!val('k1')) return toast('Kegiatan wajib diisi', 1);
+    const nip = tgtNip(), bulan = S.bulan, nilai = NILAI[S.tab], o = {kegiatan:val('k1'), output:val('k2'), tujuan:val('k3'), deskripsi:val('k4')}, tid = id || 'tmp' + Math.random().toString(36).slice(2, 8);
+    closeM();
+    setCache('getSkp', {nip, bulan}, d => { d = d || {nilai:[], kegiatan:[], dok:[], jurnal:0, jurnalBulan:0}; d.kegiatan = id ? d.kegiatan.map(k => k.id === id ? {...k, ...o} : k) : d.kegiatan.concat([{id:tid, nip, nilai, bulan, ...o}]); return d; });
+    go('laporan', 1);
+    call('saveKegiatan', {id, bulan, nip, nilai, ...o}).then(r => {
+      toast('Kegiatan disimpan.');
+      if (!id && typeof r === 'string') setCache('getSkp', {nip, bulan}, d => { d.kegiatan = d.kegiatan.map(k => k.id === tid ? {...k, id:r} : k); return d; }); else if (!id) bust('getSkp');
+      stale('getSkp'); softRefresh();
+    }).catch(e => { toast(e.message, 1); bust('getSkp'); softRefresh(); });
+  };
 }
-async function delK(id) { if (!await confirmBox('Hapus kegiatan ini beserta foto buktinya?')) return; try { await call('delKegiatan', {id, nip:tgtNip()}); toast('Kegiatan dihapus.'); go('laporan'); } catch (e) { toast(e.message, 1); } }
+async function delK(id) {
+  if (id.startsWith('tmp')) return toast('Tunggu sebentar, kegiatan sedang disimpan', 1);
+  if (!await confirmBox('Hapus kegiatan ini beserta foto buktinya?')) return;
+  const nip = tgtNip(), bulan = S.bulan;
+  setCache('getSkp', {nip, bulan}, d => { d.kegiatan = d.kegiatan.filter(k => k.id !== id); d.dok = d.dok.filter(x => x.kegiatanId !== id); return d; }); go('laporan', 1);
+  call('delKegiatan', {id, nip}).then(() => { toast('Kegiatan dihapus.'); stale('getSkp'); }).catch(e => { toast(e.message, 1); bust('getSkp'); softRefresh(); });
+}
 function compress(file, mx = 1000, q = .72) {
   return new Promise((res, rej) => { const im = new Image(); im.onload = () => { const s = Math.min(1, mx / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = im.width * s; c.height = im.height * s; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', q)); }; im.onerror = () => rej(new Error('File bukan gambar')); im.src = URL.createObjectURL(file); });
 }
 async function upFoto(inp, kid) {
-  const f = inp.files[0]; if (!f) return; toast('Mengunggah foto...');
+  const f = inp.files[0]; if (!f) return;
+  if (kid.startsWith('tmp')) return toast('Tunggu sebentar, kegiatan sedang disimpan', 1);
+  const nip = tgtNip(), bulan = S.bulan, nilai = NILAI[S.tab];
   try {
+    const prev = await compress(f, 320, .55);
+    setCache('getSkp', {nip, bulan}, d => { d.dok = d.dok.filter(x => x.kegiatanId !== kid).concat([{id:'tmp', nip, nilai, kegiatanId:kid, fileId:prev}]); return d; }); go('laporan', 1);
+    toast('Foto diunggah di latar belakang...');
     const big = await compress(f); let small = '';
     for (const [m, q] of [[560, .6], [440, .5], [340, .45], [260, .4]]) { small = await compress(f, m, q); if (small.length < 45000) break; }
     if (small.length >= 45000) small = '';
-    const r = await call('uploadFoto', {nip:tgtNip(), nilai:NILAI[S.tab], kegiatanId:kid, data:big, small});
-    toast(r.mode === 'sheet' ? 'Foto tersimpan (mode ringan karena izin Drive belum aktif).' : 'Foto bukti berhasil diunggah.'); go('laporan');
-  } catch (e) { toast(e.message, 1); }
+    const r = await call('uploadFoto', {nip, nilai, kegiatanId:kid, data:big, small});
+    toast(r.mode === 'sheet' ? 'Foto tersimpan (mode ringan karena izin Drive belum aktif).' : 'Foto bukti berhasil diunggah.'); stale('getSkp'); softRefresh();
+  } catch (e) { toast(e.message, 1); bust('getSkp'); softRefresh(); }
 }
 async function gen(b) {
   if (S.skp.kegiatan.length && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP bulan ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
-  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip(), bulan:S.bulan}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); go('laporan'); });
+  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip(), bulan:S.bulan}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); bust('getSkp'); softRefresh(); });
 }
 function editE(nip) {
   const e = S.emps.find(x => x.nip == nip) || {role:'Pegawai', status:'Aktif'};
@@ -353,11 +458,11 @@ function editE(nip) {
   <div class="two"><div><label>Role</label><select id="e5"><option ${e.role === 'Pegawai' ? 'selected' : ''}>Pegawai</option><option ${e.role === 'Admin' ? 'selected' : ''}>Admin</option></select></div>
   <div><label>Status</label><select id="e6"><option ${e.status === 'Aktif' ? 'selected' : ''}>Aktif</option><option ${e.status === 'Nonaktif' ? 'selected' : ''}>Nonaktif</option></select></div></div>
   ${nip ? '' : '<p class="mut">Password awal: 123456</p>'}<div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn sec" onclick="closeM()">Batal</button><button class="btn" id="es">Simpan</button></div>`);
-  $('#es').onclick = () => { if (!val('e1') || !val('e2')) return toast('NIP dan nama wajib diisi', 1); busy($('#es'), 'Menyimpan...', async () => { await call('saveEmp', {old:nip, nip:val('e1'), nama:val('e2'), jabatan:val('e3'), unit:val('e4'), role:val('e5'), status:val('e6')}); closeM(); toast('Data pegawai disimpan.'); go('pegawai'); }); };
+  $('#es').onclick = () => { if (!val('e1') || !val('e2')) return toast('NIP dan nama wajib diisi', 1); busy($('#es'), 'Menyimpan...', async () => { await call('saveEmp', {old:nip, nip:val('e1'), nama:val('e2'), jabatan:val('e3'), unit:val('e4'), role:val('e5'), status:val('e6')}); closeM(); toast('Data pegawai disimpan.'); bust('listEmp'); go('pegawai', 1); }); };
 }
 async function resetE(nip) { if (!await confirmBox('Reset password pegawai ini ke 123456?')) return; try { toast(await call('resetPw', {nip})); } catch (e) { toast(e.message, 1); } }
-async function togE(nip) { try { await call('toggleEmp', {nip}); toast('Status pegawai diubah.'); go('pegawai'); } catch (e) { toast(e.message, 1); } }
-async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; document.querySelectorAll('[data-k]').forEach(i => d[i.dataset.k] = i.value.trim()); await call('saveSettings', {data:d}); Object.assign(S.set, d); toast('Pengaturan disimpan.'); }); }
+async function togE(nip) { try { await call('toggleEmp', {nip}); toast('Status pegawai diubah.'); bust('listEmp'); go('pegawai', 1); } catch (e) { toast(e.message, 1); } }
+async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; document.querySelectorAll('[data-k]').forEach(i => d[i.dataset.k] = i.value.trim()); await call('saveSettings', {data:d}); Object.assign(S.set, d); setCache('getSettings', {}, x => ({...(x || {}), ...d})); toast('Pengaturan disimpan.'); }); }
 
 // ====== Cetak PDF (A4) ======
 const wrap = h => `<table class="wrap"><thead><tr><td><div class="sp"></div></td></tr></thead><tbody><tr><td class="in">${h}</td></tr></tbody><tfoot><tr><td><div class="sp"></div></td></tr></tfoot></table>`;
@@ -390,7 +495,13 @@ async function printSkp(b) {
 
 // ====== Mulai ======
 (async function () {
-  try { if (S.token) { S.user = await call('me'); await boot2(); } else loginView(); } catch (e) { loginView(); }
+  try {
+    if (S.token) {
+      S.user = lsGet('sk:user');
+      if (S.user) { boot2().catch(() => loginView()); call('me').then(u => { S.user = u; lsSet('sk:user', u); }).catch(() => {}); }
+      else { S.user = await call('me'); lsSet('sk:user', S.user); await boot2(); }
+    } else loginView();
+  } catch (e) { loginView(); }
   $('#boot').style.opacity = 0; setTimeout(() => $('#boot').remove(), 400);
 })();
 </script>
