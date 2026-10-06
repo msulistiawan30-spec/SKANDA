@@ -210,7 +210,7 @@ function confirmBox(msg) {
 }
 const skel = () => '<div class="card"><div class="sk" style="width:40%"></div><div class="sk"></div><div class="sk" style="width:80%"></div><div class="sk"></div></div>';
 const isAdmin = () => S.user && S.user.role === 'Admin';
-const tgtNip = () => S.tgt || S.user.nip;
+const tgtNip = () => S.tgt || (S.user && S.user.nip) || '';
 function menu(o) { document.querySelector('aside')?.classList.toggle('open', !!o); $('#ov').classList.toggle('on', !!o); }
 
 // ====== Login & shell ======
@@ -221,7 +221,7 @@ function loginView() {
   <button class="btn" style="width:100%;margin-top:18px" id="lb">Masuk</button></form></div></div>`;
   $('#lf').onsubmit = e => { e.preventDefault(); busy($('#lb'), 'Memeriksa...', async () => {
     const d = await call('login', {nip:$('#nip').value, password:$('#pw').value, bulan:S.bulan});
-    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; lsSet('sk:user', d.user); S.view = 'dash'; applyInit(d.init); shell();
+    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; lsSet('sk:user', d.user); S.view = 'dash'; startFresh();
   }); };
 }
 function logout(silent) {
@@ -234,6 +234,7 @@ function seed(a, d, v) {
   C[k] = v; T[k] = Date.now(); lsSet(lsk(k), v); return ch;
 }
 function applyInit(i) {
+  if (i.v !== 6) toast('Backend Apps Script belum diperbarui. Buat Deploy versi baru di Apps Script agar aplikasi cepat.', 1);
   S.user = i.me; lsSet('sk:user', i.me); S.set = i.settings; S.emps = i.emps || [];
   let ch = seed('getSettings', {}, i.settings);
   if (i.me.role === 'Admin') ch = seed('listEmp', {}, i.emps) || ch;
@@ -242,20 +243,25 @@ function applyInit(i) {
   ch = seed('getJurnal', {nip:i.nip, bulan:i.bulan}, i.jurnalBulan) || ch;
   return ch;
 }
+function startFresh() {
+  shell(true); $('#main').innerHTML = skel();
+  call('init', {bulan:S.bulan}).then(i => { applyInit(i); go(S.view); }).catch(e => { $('#main').innerHTML = '<div class="card">Gagal memuat: ' + esc(e.message) + '</div>'; });
+}
 function refreshInit() {
   const w0 = W;
   call('init', {nip:S.user ? tgtNip() : undefined, bulan:S.bulan}).then(i => { if (w0 !== W) return; if (applyInit(i)) softRefresh(); }).catch(() => {});
 }
-function shell() {
+function shell(skipGo) {
   const nav = NAV_EMP.concat(isAdmin() ? NAV_ADMIN : []), bn = ['dash', 'jurnal', 'laporan', 'profil'].map(id => nav.find(n => n[0] === id));
   const link = n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')" title="${n[1]}"><i>${n[2]}</i><span class="lb">${n[1]}</span><span class="sh">${n[3]}</span></a>`;
   $('#app').innerHTML = `<div class="top"><button class="btn sec sm" onclick="menu(1)" aria-label="Menu">☰</button><img src="${LOGO}" alt=""><b>SKANDA</b></div><div class="shell"><aside>
   <div class="brand"><img src="${LOGO}" alt=""><span class="lb">SKANDA<small>SKP SMKN Dander</small></span></div>${nav.map(link).join('')}
   <div class="who"><div class="wn"><b>${esc(S.user.nama)}</b><br>${esc(S.user.role)}</div><a onclick="logout()" title="Keluar"><i>⏻</i><span class="lb">Keluar</span><span class="sh">Keluar</span></a></div></aside><main id="main"></main></div>
   <nav id="bn">${bn.map(n => `<a data-v="${n[0]}" class="${S.view === n[0] ? 'on' : ''}" onclick="go('${n[0]}')"><i>${n[2]}</i><span>${n[3]}</span></a>`).join('')}<a onclick="menu(1)"><i>☰</i><span>Menu</span></a></nav>`;
-  go(S.view);
+  if (!skipGo) go(S.view);
 }
 async function go(v, silent) {
+  if (!S.user) return loginView();
   S.view = v; menu(0);
   document.querySelectorAll('[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === v));
   if (!silent) $('#main').innerHTML = skel();
@@ -306,6 +312,7 @@ const VIEWS = {
  async laporan() {
   const d = S.skp = await get('getSkp', {nip:tgtNip(), bulan:S.bulan}); const n = NILAI[S.tab];
   const ks = d.kegiatan.filter(k => k.nilai === n), nd = d.nilai.find(x => x.nilai === n);
+  setTimeout(() => warm(d.dok.filter(x => ks.some(k => k.id === x.kegiatanId)).map(x => x.fileId)), 600);
   return `<div class="row" style="justify-content:space-between"><h1>Laporan SKP</h1><div class="row"><button class="btn warn" onclick="gen(this)">✦ Generate SKP</button><button class="btn" onclick="printSkp(this)">Cetak PDF</button></div></div>${picker()}${monthPick()}
   <p class="mut" style="margin:0">Jurnal bulan ini: ${d.jurnalBulan}. Generate SKP menyusun kegiatan, output, dan tujuan dari jurnal. Cetak PDF hanya mencetak tab yang sedang dipilih (${n}).</p>
   <div class="tabs">${NILAI.map((x, i) => `<button class="${i === S.tab ? 'on' : ''}" onclick="S.tab=${i};go('laporan')">${x}</button>`).join('')}</div>
@@ -461,7 +468,7 @@ async function upFoto(inp, kid) {
 }
 async function gen(b) {
   if (S.skp.kegiatan.length && !await confirmBox('Generate ulang akan mengganti semua kegiatan SKP bulan ini dan menghapus foto dokumentasinya. Jurnal asli tidak dihapus.')) return;
-  busy(b, 'Menyusun...', async () => { const n = await call('generate', {nip:tgtNip(), bulan:S.bulan}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); bust('getSkp'); softRefresh(); });
+  busy(b, 'Menyusun (±20 detik)...', async () => { const n = await call('generate', {nip:tgtNip(), bulan:S.bulan}); toast(n + ' kegiatan SKP berhasil disusun. Silakan periksa dan edit.'); bust('getSkp'); softRefresh(); });
 }
 function editE(nip) {
   const e = S.emps.find(x => x.nip == nip) || {role:'Pegawai', status:'Aktif'};
@@ -478,28 +485,34 @@ async function saveSet(b) { busy(b, 'Menyimpan...', async () => { const d = {}; 
 
 // ====== Cetak PDF (A4) ======
 const wrap = h => `<table class="wrap"><thead><tr><td><div class="sp"></div></td></tr></thead><tbody><tr><td class="in">${h}</td></tr></tbody><tfoot><tr><td><div class="sp"></div></td></tr></tfoot></table>`;
+const PH = {}, PHq = new Set();
+async function warm(ids) {
+  const need = [...new Set(ids)].filter(i => i && !String(i).startsWith('data:') && !PH[i] && !PHq.has(i)), nip = tgtNip(), jobs = [];
+  for (let i = 0; i < need.length; i += 3) {
+    const c = need.slice(i, i + 3); c.forEach(x => PHq.add(x));
+    jobs.push(call('fotoData', {nip, ids:c}).then(m => Object.assign(PH, m)).catch(() => {}).finally(() => c.forEach(x => PHq.delete(x))));
+  }
+  await Promise.all(jobs);
+}
 async function printSkp(b) {
   busy(b, 'Menyiapkan...', async () => {
-    const d = await call('getSkp', {nip:tgtNip(), bulan:S.bulan}), st = S.set = await call('getSettings'), p = d.emp;
-    const used = [NILAI[S.tab]].filter(n => d.kegiatan.some(k => k.nilai === n));
+    let d = await get('getSkp', {nip:tgtNip(), bulan:S.bulan}, () => {});
+    if (!d.emp) d = await call('getSkp', {nip:tgtNip(), bulan:S.bulan});
+    const st = S.set, p = d.emp, used = [NILAI[S.tab]].filter(n => d.kegiatan.some(k => k.nilai === n));
     if (!used.length) throw new Error('Belum ada kegiatan pada nilai ' + NILAI[S.tab] + ' di bulan ini');
-    const ids = d.dok.filter(x => d.kegiatan.some(k => k.id === x.kegiatanId && k.nilai === used[0])).map(x => x.fileId).filter(i => !String(i).startsWith('data:')), foto = {};
-    for (let i = 0; i < ids.length; i += 5) Object.assign(foto, await call('fotoData', {nip:tgtNip(), ids:ids.slice(i, i + 5)}));
+    const ids = d.dok.filter(x => d.kegiatan.some(k => k.id === x.kegiatanId && k.nilai === used[0])).map(x => x.fileId).filter(i => !String(i).startsWith('data:'));
+    for (let w = 0; w < 40 && ids.some(i => !PH[i] && PHq.has(i)); w++) await new Promise(r => setTimeout(r, 150));
+    await warm(ids);
     const [y, m] = S.bulan.split('-').map(Number), tgl = new Date(y, m, 0).toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const kop = `<div class="kop"><img src="${st.logo || LOGO}"><div>${esc(st.pemerintah)}<br>${esc(st.dinas)}<br><b style="font-size:14pt">${esc(st.sekolah)}</b><br><small>${esc(st.alamat)} Telp. ${esc(st.telepon)}</small></div></div>`;
     const ttd = `<div class="ttd">${esc(st.kota)}, ${tgl}<br>${esc(p.jabatan)}<br>${p.ttd ? `<img src="${p.ttd}"><br>` : '<br><br><br>'}<b><u>${esc(p.nama)}</u></b><br>NIP. ${esc(p.nip)}</div>`;
-    let h = '';
-    used.forEach((n, i) => {
-      const ks = d.kegiatan.filter(k => k.nilai === n), nl = d.nilai.find(x => x.nilai === n);
-      h += wrap(`${kop}<h3 style="text-align:center;margin:0 0 8px">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(DESC[n])}</p>
+    const n = used[0], ks = d.kegiatan.filter(k => k.nilai === n);
+    $('#print').innerHTML = wrap(`${kop}<h3 style="text-align:center;margin:0 0 8px">${n.toUpperCase()}</h3><p style="text-align:justify">${esc(DESC[n])}</p>
       <table class="tb"><tr><th style="width:7%">No.</th><th>Kegiatan</th><th>Output yang dihasilkan</th><th>Tujuan</th></tr>${ks.map((k, j) => `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${esc(k.output)}</td><td>${esc(k.tujuan)}</td></tr>`).join('')}</table>
       <h4 style="text-align:center;margin:18px 0 8px">DOKUMENTASI KEGIATAN</h4><table class="tb"><tr><th style="width:7%">No.</th><th style="width:38%">Kegiatan</th><th>Dokumentasi</th></tr>
-      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id), f = x && (String(x.fileId).startsWith('data:') ? x.fileId : foto[x.fileId]); return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${f ? `<img class="d" src="${f}">` : ''}</td></tr>`; }).join('')}</table>
-      ${i === used.length - 1 ? ttd : ''}`);
-    });
-    $('#print').innerHTML = h;
+      ${ks.map((k, j) => { const x = d.dok.find(o => o.kegiatanId === k.id), f = x && (String(x.fileId).startsWith('data:') ? x.fileId : PH[x.fileId]); return `<tr><td>${j + 1}</td><td>${esc(k.kegiatan)}</td><td>${f && f.length > 10 ? `<img class="d" src="${f}">` : ''}</td></tr>`; }).join('')}</table>${ttd}`);
     await Promise.all([...document.querySelectorAll('#print img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; setTimeout(r, 6000); })));
-    const old = document.title; document.title = 'SKP ' + p.nama + ' ' + used[0] + ' ' + S.bulan;
+    const old = document.title; document.title = 'SKP ' + p.nama + ' ' + n + ' ' + S.bulan;
     window.onafterprint = () => { document.title = old; $('#print').innerHTML = ''; };
     print();
   });
@@ -511,6 +524,7 @@ async function printSkp(b) {
     if (S.token) {
       S.user = lsGet('sk:user'); const cs = lsGet(lsk(ck('getSettings', {})));
       if (S.user && cs) { S.set = cs; S.emps = lsGet(lsk(ck('listEmp', {}))) || []; Object.keys(localStorage).filter(k => k.startsWith('sk:d:')).forEach(k => T[k.slice(5)] = Date.now()); shell(); refreshInit(); }
+      else if (S.user) startFresh();
       else { applyInit(await call('init', {bulan:S.bulan})); shell(); }
     } else loginView();
   } catch (e) { loginView(); }
