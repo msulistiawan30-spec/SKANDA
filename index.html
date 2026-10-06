@@ -6,8 +6,9 @@
 <meta name="theme-color" content="#0e5a4f">
 <meta name="mobile-web-app-capable" content="yes">
 <title>SKANDA - Sistem SKP SMKN Dander</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
 :root{--ink:#14302f;--pine:#0e5a4f;--pine2:#0b4a41;--mist:#eef3f2;--line:#d6e0de;--amber:#e8a317;--red:#c2410c;--ok:#15803d;--mut:#5b7270;--r:12px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 *{box-sizing:border-box}html,body{margin:0;height:100%}body{background:var(--mist);color:var(--ink);font-size:14px;line-height:1.5}
@@ -162,7 +163,7 @@ async function call(action, data = {}) {
 }
 /** Baca data: tampilkan cache seketika, segarkan di latar belakang. */
 async function get(action, data = {}, onFresh) {
-  const k = ck(action, data), v0 = S.view, fresh = Date.now() - (T[k] || 0) < 15000;
+  const k = ck(action, data), v0 = S.view, fresh = Date.now() - (T[k] || 0) < 45000;
   if (C[k] === undefined) C[k] = lsGet(lsk(k));
   const cb = onFresh || (() => { if (S.view === v0) softRefresh(); });
   const net = () => {
@@ -192,11 +193,8 @@ function softRefresh(n = 8) {
   if (editing()) { if (n > 0) setTimeout(() => softRefresh(n - 1), 4000); return; }
   go(S.view, 1);
 }
-function prefetch() {
-  const n = tgtNip(), [y, m] = S.bulan.split('-').map(Number), pv = new Date(y, m - 2, 1), pb = pv.getFullYear() + '-' + String(pv.getMonth() + 1).padStart(2, '0'), nop = () => {};
-  [['getSkp', {nip:n}], ['getSkp', {nip:n, bulan:S.bulan}], ['getJurnal', {nip:n, bulan:S.bulan}], ['getSkp', {nip:n, bulan:pb}], ['getJurnal', {nip:n, bulan:pb}]].forEach(([a, d]) => get(a, d, nop).catch(() => {}));
-}
-document.addEventListener('visibilitychange', () => { if (!document.hidden && S.user) { stale(); softRefresh(); } });
+function prefetch() { refreshInit(); }
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.user) refreshInit(); });
 function toast(m, err) { const d = document.createElement('div'); d.className = 't' + (err ? ' e' : ''); d.textContent = (err ? '❌ ' : '✅ ') + m; $('#toast').append(d); setTimeout(() => d.remove(), 3800); }
 async function busy(btn, label, fn) {
   const t = btn.textContent; btn.disabled = true; btn.textContent = label;
@@ -222,8 +220,8 @@ function loginView() {
   <label>NIP</label><input id="nip" autocomplete="username" required><label>Password</label><input id="pw" type="password" autocomplete="current-password" required>
   <button class="btn" style="width:100%;margin-top:18px" id="lb">Masuk</button></form></div></div>`;
   $('#lf').onsubmit = e => { e.preventDefault(); busy($('#lb'), 'Memeriksa...', async () => {
-    const d = await call('login', {nip:$('#nip').value, password:$('#pw').value});
-    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; lsSet('sk:user', d.user); S.view = 'dash'; await boot2();
+    const d = await call('login', {nip:$('#nip').value, password:$('#pw').value, bulan:S.bulan});
+    S.token = d.token; S.user = d.user; localStorage.skToken = d.token; lsSet('sk:user', d.user); S.view = 'dash'; applyInit(d.init); shell();
   }); };
 }
 function logout(silent) {
@@ -231,9 +229,22 @@ function logout(silent) {
   Object.keys(C).forEach(k => delete C[k]); Object.keys(T).forEach(k => delete T[k]);
   S.token = ''; S.user = null; S.tgt = ''; S.set = {}; S.emps = []; closeM(); loginView(); if (!silent) toast('Anda sudah keluar');
 }
-async function boot2() {
-  const [st, em] = await Promise.all([get('getSettings', {}, v => { S.set = v; }), isAdmin() ? get('listEmp', {}, v => { S.emps = v; }) : []]);
-  S.set = st; S.emps = em; shell(); prefetch();
+function seed(a, d, v) {
+  const k = ck(a, d), ch = JSON.stringify(v) !== JSON.stringify(C[k] === undefined ? lsGet(lsk(k)) : C[k]);
+  C[k] = v; T[k] = Date.now(); lsSet(lsk(k), v); return ch;
+}
+function applyInit(i) {
+  S.user = i.me; lsSet('sk:user', i.me); S.set = i.settings; S.emps = i.emps || [];
+  let ch = seed('getSettings', {}, i.settings);
+  if (i.me.role === 'Admin') ch = seed('listEmp', {}, i.emps) || ch;
+  ch = seed('getSkp', {nip:i.nip}, i.skpAll) || ch;
+  ch = seed('getSkp', {nip:i.nip, bulan:i.bulan}, i.skpBulan) || ch;
+  ch = seed('getJurnal', {nip:i.nip, bulan:i.bulan}, i.jurnalBulan) || ch;
+  return ch;
+}
+function refreshInit() {
+  const w0 = W;
+  call('init', {nip:S.user ? tgtNip() : undefined, bulan:S.bulan}).then(i => { if (w0 !== W) return; if (applyInit(i)) softRefresh(); }).catch(() => {});
 }
 function shell() {
   const nav = NAV_EMP.concat(isAdmin() ? NAV_ADMIN : []), bn = ['dash', 'jurnal', 'laporan', 'profil'].map(id => nav.find(n => n[0] === id));
@@ -391,12 +402,13 @@ async function sendItems(items) {
     .catch(e => toast(e.message, 1)).finally(() => { S.ai--; bust('getJurnal'); stale('getSkp'); softRefresh(); });
 }
 async function impText(b) { sendItems(parseLines($('#jx').value)); }
+const loadXLSX = () => window.XLSX ? Promise.resolve() : new Promise((ok, no) => { const t = document.createElement('script'); t.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; t.onload = ok; t.onerror = () => no(new Error('Gagal memuat pustaka Excel. Periksa koneksi.')); document.head.append(t); });
 async function impFile(inp) {
   const f = inp.files[0]; if (!f) return;
   try {
     let items;
     if (/\.(xlsx?|XLSX?)$/.test(f.name)) {
-      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'}); const r = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:true});
+      await loadXLSX(); const wb = XLSX.read(await f.arrayBuffer(), {type:'array'}); const r = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:true});
       items = r.filter(x => x.length).map(x => x.length > 1 ? {tanggal:nd(x[0]), uraian:String(x[1] ?? '')} : {tanggal:today(), uraian:String(x[0])}).filter(x => x.uraian && !/^uraian/i.test(x.uraian));
     } else items = parseLines(await f.text()).filter(x => !/^(tanggal|uraian)/i.test(x.uraian));
     await sendItems(items);
@@ -497,9 +509,9 @@ async function printSkp(b) {
 (async function () {
   try {
     if (S.token) {
-      S.user = lsGet('sk:user');
-      if (S.user) { boot2().catch(() => loginView()); call('me').then(u => { S.user = u; lsSet('sk:user', u); }).catch(() => {}); }
-      else { S.user = await call('me'); lsSet('sk:user', S.user); await boot2(); }
+      S.user = lsGet('sk:user'); const cs = lsGet(lsk(ck('getSettings', {})));
+      if (S.user && cs) { S.set = cs; S.emps = lsGet(lsk(ck('listEmp', {}))) || []; Object.keys(localStorage).filter(k => k.startsWith('sk:d:')).forEach(k => T[k.slice(5)] = Date.now()); shell(); refreshInit(); }
+      else { applyInit(await call('init', {bulan:S.bulan})); shell(); }
     } else loginView();
   } catch (e) { loginView(); }
   $('#boot').style.opacity = 0; setTimeout(() => $('#boot').remove(), 400);
